@@ -11,6 +11,11 @@ func Apis(a *app.App) http.Handler {
 	mux := http.NewServeMux()
 
 	ping(a, mux)
+	// TODO: login(a, mux)
 
-	return middleware.Log(mux)
+	handler := middleware.Stack(
+		middleware.Log,
+	)(mux)
+
+	return handler
 }

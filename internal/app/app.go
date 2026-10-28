@@ -1,7 +1,20 @@
 package app
 
-type Config struct{}
+import (
+	"github.com/Ankumeah/SourceFlame/internal/db"
+	"github.com/Ankumeah/SourceFlame/internal/hash"
+)
+
+type Config struct {
+	ApiVersion string
+	Host       string
+	DBURL      string
+	ReposPath  string
+	HashConfig string
+}
 
 type App struct {
 	Config Config
+	Hasher hash.Hasher
+	DB     *db.DBController
 }

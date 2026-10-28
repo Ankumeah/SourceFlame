@@ -1,7 +1,7 @@
 default: run
 
 run *args:
-  go build -o build/out .
+  go build -o build/out ./cmd/sourceflame/
   ./build/out {{ args }}
 
 ci ci = "":

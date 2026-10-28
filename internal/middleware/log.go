@@ -1,19 +1,24 @@
 package middleware
 
 import (
+	"context"
 	"log"
 	"net/http"
 )
+
+const ErrorsKey = Key("errors")
 
 func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			log.Printf(
-				"%v %v %v\n",
+				"%s %s %s\n",
 				r.RemoteAddr, r.Method, r.URL.Path,
 			)
 
-			next.ServeHTTP(w, r)
+			ctx := context.WithValue(r.Context(), ErrorsKey, []map[string]any{})
+
+			next.ServeHTTP(w, r.WithContext(ctx))
 		},
 	)
 }
