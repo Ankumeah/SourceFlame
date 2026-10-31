@@ -1,11 +1,9 @@
-package middleware
+package middlewares
 
 import (
 	"context"
 	"encoding/base64"
-	"log"
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/Ankumeah/SourceFlame/internal/utils"
@@ -14,24 +12,15 @@ import (
 const UserKey = Key("user")
 const PassKey = Key("pass")
 
-func BasicAuth(next http.Handler) http.Handler {
-	isUsernameValid := regexp.MustCompilePOSIX("^[a-zA-Z0-9_-]{4,}$")
-	isUsernameValid.Longest()
-
+func ParseBasicAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			errs, ok := r.Context().Value(ErrorsKey).([]map[string]any)
-			if !ok {
-				log.Printf("%s %s: error map not set", r.Method, r.URL.Path)
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
 			auth := strings.TrimSpace(r.Header.Get("Authorization"))
 			if len(auth) <= 0 {
 				utils.RespMsg(
 					"Authorization not provided",
 					http.StatusInternalServerError,
-					errs, w,
+					w,
 				)
 				return
 			}
@@ -41,7 +30,7 @@ func BasicAuth(next http.Handler) http.Handler {
 				utils.RespMsg(
 					"Incorrect amount of segements Authorization",
 					http.StatusInternalServerError,
-					errs, w,
+					w,
 				)
 				return
 			}
@@ -53,7 +42,7 @@ func BasicAuth(next http.Handler) http.Handler {
 				utils.RespMsg(
 					"Unsupported auth type",
 					http.StatusBadRequest,
-					errs, w,
+					w,
 				)
 				return
 			}
@@ -63,7 +52,7 @@ func BasicAuth(next http.Handler) http.Handler {
 				utils.RespMsg(
 					"Invalid base64 auth",
 					http.StatusBadRequest,
-					errs, w,
+					w,
 				)
 				return
 			}
@@ -73,16 +62,16 @@ func BasicAuth(next http.Handler) http.Handler {
 				utils.RespMsg(
 					"Invalid auth format",
 					http.StatusBadRequest,
-					errs, w,
+					w,
 				)
 				return
 			}
 
-			if username != string(isUsernameValid.Find([]byte(username))) {
+			if !utils.IsValidName(username) {
 				utils.RespMsg(
 					"Username not allowed",
 					http.StatusBadRequest,
-					errs, w,
+					w,
 				)
 				return
 			}

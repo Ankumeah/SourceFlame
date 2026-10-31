@@ -5,12 +5,12 @@ import (
 	"net/http"
 )
 
-func RespMsg(message string, status int, errs []map[string]any, w http.ResponseWriter) {
+func RespMsg(message string, status int, w http.ResponseWriter) {
 	resp, err := json.Marshal(map[string]any{
 		"error": message,
 	})
 	if err != nil {
-		RespErr(err, errs, w)
+		RespErr(err, w)
 		return
 	}
 

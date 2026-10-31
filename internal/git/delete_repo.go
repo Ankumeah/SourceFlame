@@ -2,10 +2,11 @@ package git
 
 import (
 	"os"
+	"path/filepath"
 )
 
-func DeleteRepo(
+func (g GitController) DeleteRepo(
 	path string,
 ) error {
-	return os.RemoveAll(path)
+	return os.RemoveAll(filepath.Join(g.basePath, path))
 }

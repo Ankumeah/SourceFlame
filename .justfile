@@ -1,4 +1,5 @@
 default: run
+set dotenv-filename := "env.example"
 
 run *args:
   go build -o build/out ./cmd/sourceflame/

@@ -1,12 +1,11 @@
 package utils
 
 import (
+	"log"
 	"net/http"
 )
 
-func RespErr(err error, errs []map[string]any, w http.ResponseWriter) {
-	errs = append(errs, map[string]any{
-		"error": err,
-	})
+func RespErr(err error, w http.ResponseWriter) {
+	log.Println(err)
 	w.WriteHeader(http.StatusInternalServerError)
 }

@@ -6,6 +6,8 @@ import (
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/db"
+	"github.com/Ankumeah/SourceFlame/internal/db/migrations"
+	"github.com/Ankumeah/SourceFlame/internal/git"
 	"github.com/Ankumeah/SourceFlame/internal/hash"
 )
 
@@ -21,7 +23,18 @@ func getDB(ctx context.Context, app *app.App) {
 	log.Println("Got DB conn")
 }
 
-func getHasher(ctx context.Context, app *app.App) {
+func migrateDB(ctx context.Context, app *app.App) {
+	log.Println("Starting DB migrations")
+
+	before, after, err := migrations.ApplyMigrations(ctx, app.DB.DB())
+	if err != nil {
+		log.Fatalf("Error while migrating db: %v\n", err)
+	}
+
+	log.Printf("DB migrations complete (%v -> %v)\n", before, after)
+}
+
+func getHasher(app *app.App) {
 	log.Println("Getting hasher")
 
 	var err error
@@ -31,4 +44,12 @@ func getHasher(ctx context.Context, app *app.App) {
 	}
 
 	log.Println("Got hasher")
+}
+
+func getGitController(app *app.App) {
+	log.Println("Getting git controller")
+
+	app.GitController = git.GetGitController(app.Config.ReposPath)
+
+	log.Println("Got git controller")
 }

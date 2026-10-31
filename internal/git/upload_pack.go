@@ -2,21 +2,32 @@ package git
 
 import (
 	"context"
+	"errors"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
+
+	"github.com/Ankumeah/SourceFlame/internal/errs"
 )
 
-func UploadPack(
+func (g GitController) UploadPack(
 	ctx context.Context,
 	path string,
 	reader io.Reader,
 	writer io.Writer,
 ) error {
+	if _, err := os.Stat(
+		filepath.Join(g.basePath, path),
+	); errors.Is(err, os.ErrNotExist) {
+		return errs.ErrInvalidRepo
+	}
+
 	cmd := exec.CommandContext(
 		ctx,
 		"git-upload-pack",
 		"--stateless-rpc",
-		path,
+		filepath.Join(g.basePath, path),
 	)
 	cmd.Stdin = reader
 	cmd.Stdout = writer

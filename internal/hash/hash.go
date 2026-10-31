@@ -17,16 +17,16 @@ func GetHasher(hashConfig string) (Hasher, error) {
 }
 
 func (h Hasher) GenerateHash(password []byte, salt []byte) (Hash, error) {
-	var err error
 	if len(salt) == 0 {
-		salt, err = randomSalt(h.saltLen)
+		var err error
+		salt, err = randomSalt(h.SaltLen)
 
 		if err != nil {
 			return Hash{}, err
 		}
 	}
 
-	_hash := argon2.IDKey(password, salt, h.time, h.memory, h.threads, h.keyLen)
+	_hash := argon2.IDKey(password, salt, h.Time, h.Memory, h.Threads, h.KeyLen)
 
 	return Hash{Hash: _hash, Salt: salt}, nil
 }

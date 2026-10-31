@@ -25,7 +25,6 @@ func (v1) Apply(
 		ctx, `
       CREATE TABLE users (
         id        INTEGER   PRIMARY KEY,
-        uuid      TEXT      NOT NULL      UNIQUE,
         name      TEXT      NOT NULL      UNIQUE,
         password  TEXT      NOT NULL,
         salt      TEXT      NOT NULL
@@ -38,12 +37,11 @@ func (v1) Apply(
 	if _, err := tx.ExecContext(
 		ctx, `
       CREATE TABLE repos (
-        id          INTEGER   PRIMARY KEY,
-        uuid        TEXT      NOT NULL      UNIQUE,
-        name        TEXT      NOT NULL,
-        owner_uuid  TEXT      NOT NULL      REFERENCES users(uuid),
+        id    INTEGER   PRIMARY KEY,
+        name  TEXT      NOT NULL,
+        owner TEXT      NOT NULL      REFERENCES users(name)  ON DELETE CASCADE,
 
-        UNIQUE (name, owner_uuid)
+        UNIQUE (owner, name)
       );
     `,
 	); err != nil {

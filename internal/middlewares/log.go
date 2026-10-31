@@ -1,7 +1,6 @@
-package middleware
+package middlewares
 
 import (
-	"context"
 	"log"
 	"net/http"
 )
@@ -16,9 +15,7 @@ func Log(next http.Handler) http.Handler {
 				r.RemoteAddr, r.Method, r.URL.Path,
 			)
 
-			ctx := context.WithValue(r.Context(), ErrorsKey, []map[string]any{})
-
-			next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r)
 		},
 	)
 }

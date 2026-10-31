@@ -9,14 +9,15 @@ import (
 )
 
 // This applies checks current DB migration version
-// and all applies all migrations having a higher version.
+// and all applies all migrations having a higher version
+// and returns migration version before and after the migration.
 // All migrations are run within a DB transaction
 //
 // # This function is safe to run on a new DB
 //
 // This function will error on any DB error or
 // if any two migrations have the same number
-func ApplyMigrations(ctx context.Context, db *sql.DB) error {
+func ApplyMigrations(ctx context.Context, db *sql.DB) (uint64, uint64, error) {
 	var matchingVersions error
 
 	// Sort the migrations as they may be out of order as they
@@ -40,19 +41,19 @@ func ApplyMigrations(ctx context.Context, db *sql.DB) error {
 		},
 	)
 	if matchingVersions != nil {
-		return matchingVersions
+		return 0, 0, matchingVersions
 	}
 
 	// v0 is applied no matter what so that
 	// `getCurrentMigration` does not fail
 	err := v0{}.Apply(ctx, db)
 	if err != nil {
-		return fmt.Errorf("Migration 0: %w", err)
+		return 0, 0, fmt.Errorf("Migration 0: %w", err)
 	}
 
 	currentVersion, err := getCurrentMigration(ctx, db)
 	if err != nil {
-		return err
+		return 0, 0, err
 	}
 
 	for _, m := range migrations {
@@ -73,9 +74,14 @@ func ApplyMigrations(ctx context.Context, db *sql.DB) error {
 			}
 			return nil
 		}(); err != nil {
-			return err
+			return 0, 0, err
 		}
 	}
 
-	return nil
+	newVersion, err := getCurrentMigration(ctx, db)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return currentVersion, newVersion, nil
 }

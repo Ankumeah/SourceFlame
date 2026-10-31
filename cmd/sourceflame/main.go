@@ -17,8 +17,12 @@ func main() {
 	loadEnv(a)
 
 	var wg sync.WaitGroup
-	wg.Go(func() { getDB(ctx, a) })
-	wg.Go(func() { getHasher(ctx, a) })
+	wg.Go(func() {
+		getDB(ctx, a)
+		migrateDB(ctx, a)
+	})
+	wg.Go(func() { getHasher(a) })
+	wg.Go(func() { getGitController(a) })
 	wg.Wait()
 
 	if err := http.ListenAndServe(
