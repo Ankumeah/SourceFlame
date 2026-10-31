@@ -41,7 +41,7 @@ jobs:
               GOOS="$os" GOARCH="$arch" go build \
                 -o "$output" \
                 -ldflags="-s -w" \
-                .
+                ./cmd/sourceflame/
             done
           done
 
