@@ -17,9 +17,10 @@ func ParseBasicAuth(next http.Handler) http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			auth := strings.TrimSpace(r.Header.Get("Authorization"))
 			if len(auth) <= 0 {
+				w.Header().Add("WWW-Authenticate", "Basic realm=\"SourceFlame\"")
 				utils.RespMsg(
 					"Authorization not provided",
-					http.StatusInternalServerError,
+					http.StatusUnauthorized,
 					w,
 				)
 				return

@@ -27,6 +27,7 @@ func NewRoute(
 func (rg Route) Handle(
 	pattern string,
 	handler func(http.ResponseWriter, *http.Request),
+	middlewares ...func(http.Handler) http.Handler,
 ) {
 	method := ""
 	route := ""
@@ -42,6 +43,10 @@ func (rg Route) Handle(
 
 	next := http.Handler(http.HandlerFunc(handler))
 
+	for _, v := range slices.Backward(middlewares) {
+		next = v(next)
+	}
+
 	for _, v := range slices.Backward(rg.middlewares) {
 		next = v(next)
 	}
@@ -52,8 +57,13 @@ func (rg Route) Handle(
 func (rg Route) Base(
 	method string,
 	handler func(http.ResponseWriter, *http.Request),
+	middlewares ...func(http.Handler) http.Handler,
 ) {
 	next := http.Handler(http.HandlerFunc(handler))
+
+	for _, v := range slices.Backward(middlewares) {
+		next = v(next)
+	}
 
 	for _, v := range slices.Backward(rg.middlewares) {
 		next = v(next)

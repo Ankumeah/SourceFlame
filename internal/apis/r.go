@@ -7,6 +7,7 @@ import (
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	e "github.com/Ankumeah/SourceFlame/internal/errs"
+	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 	"github.com/Ankumeah/SourceFlame/internal/utils"
 )
 
@@ -112,11 +113,26 @@ func r(a *app.App, root Route) {
 		func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
-			user := r.PathValue("user")
-			if !utils.IsValidName(user) {
+			owner := r.PathValue("user")
+			if !utils.IsValidName(owner) {
 				utils.RespMsg(
 					"Invalid username",
 					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			user, ok := ctx.Value(middlewares.UserKey).(string)
+			if !ok {
+				utils.RespErr(errors.New("user set by middleware not string"), w)
+				return
+			}
+
+			if user != owner {
+				utils.RespMsg(
+					"Must be owner to push",
+					http.StatusForbidden,
 					w,
 				)
 				return
@@ -133,7 +149,7 @@ func r(a *app.App, root Route) {
 			}
 
 			if err := a.GitController.ReceivePack(
-				ctx, filepath.Join(user, repo), r.Body, w,
+				ctx, filepath.Join(owner, repo), r.Body, w,
 			); errors.Is(err, e.ErrInvalidRepo) {
 				utils.RespMsg(
 					err.Error(),
@@ -145,6 +161,6 @@ func r(a *app.App, root Route) {
 				utils.RespErr(err, w)
 				return
 			}
-		},
+		}, func(h http.Handler) http.Handler { return middlewares.BasicAuth(h, a) },
 	)
 }
