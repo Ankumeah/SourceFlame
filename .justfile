@@ -1,8 +1,8 @@
 default: run
-set dotenv-filename := "env.example"
+set dotenv-filename := "env.justfile"
 
 run *args:
-  go build -o build/out ./cmd/sourceflame/
+  CGO_ENABLED=0 go build -o build/out ./cmd/sourceflame/
   ./build/out {{ args }}
 
 ci ci = "":
