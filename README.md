@@ -1,5 +1,7 @@
 # SourceFlame
 
+![Horrible looking logo](logo.png)
+
 SourceFlame is a minimal git server written in [Golong](https://go.dev)
 
 > [!NOTE]
@@ -11,6 +13,18 @@ of better design decisions
 ## How to run
 > [!NOTE]
 > Make sure to check and edit env.example to your use
+
+```sh
+docker pull sourceflame:v0.1.0
+
+docker run \
+  --name sf \
+  --env-file env.example \
+  --volume ./data:/opt/sf/build/repos \
+  sourceflame:v0.1.0
+```
+
+or
 
 ```sh
 go build -o build/sf -ldflags='-s -w' .
