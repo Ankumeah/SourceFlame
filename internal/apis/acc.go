@@ -1,11 +1,11 @@
 package apis
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
-	e "github.com/Ankumeah/SourceFlame/internal/errs"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 	"github.com/Ankumeah/SourceFlame/internal/utils"
 )
@@ -37,13 +37,49 @@ func acc(a *app.App, root Route) {
 				return
 			}
 
-			if err := a.DB.AddUser(
-				ctx, user, hash,
-			); errors.Is(err, e.ErrExistsUser) {
-				utils.RespMsg(err.Error(), http.StatusConflict, w)
+			if !handle(a.DB.AddUser(ctx, user, hash), w) {
 				return
-			} else if err != nil {
-				utils.RespErr(err, w)
+			}
+
+			w.WriteHeader(http.StatusOK)
+		},
+	)
+
+	authed.Base(
+		"PATCH",
+		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			user, ok := ctx.Value(middlewares.UserKey).(string)
+			if !ok {
+				utils.RespErr(errors.New("user set by middleware not string"), w)
+				return
+			}
+
+			request := struct {
+				Email string `json:"email"`
+			}{}
+
+			if r.Body == nil {
+				utils.RespMsg(
+					"No json body provided",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+			defer r.Body.Close()
+
+			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+				utils.RespMsg(
+					"Invalid json body",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			if !handle(a.DB.ChangeEmail(ctx, user, request.Email), w) {
 				return
 			}
 
@@ -62,15 +98,7 @@ func acc(a *app.App, root Route) {
 				return
 			}
 
-			if err := a.DB.DeleteUser(ctx, user); errors.Is(err, e.ErrInvalidUser) {
-				utils.RespMsg(
-					err.Error(),
-					http.StatusNotFound,
-					w,
-				)
-				return
-			} else if err != nil {
-				utils.RespErr(err, w)
+			if !handle(a.DB.DeleteUser(ctx, user), w) {
 				return
 			}
 

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
-	e "github.com/Ankumeah/SourceFlame/internal/errs"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 	"github.com/Ankumeah/SourceFlame/internal/utils"
 )
@@ -51,17 +50,11 @@ func r(a *app.App, root Route) {
 
 			w.Header().Add("Content-Type", "application/x-"+service+"-advertisement")
 
-			if err := a.GitController.InfoRefs(
-				ctx, filepath.Join(user, repo), service, w,
-			); errors.Is(err, e.ErrInvalidRepo) {
-				utils.RespMsg(
-					err.Error(),
-					http.StatusNotFound,
-					w,
-				)
-				return
-			} else if err != nil {
-				utils.RespErr(err, w)
+			if !handle(
+				a.GitController.InfoRefs(
+					ctx, filepath.Join(user, repo), service, w,
+				), w,
+			) {
 				return
 			}
 		},
@@ -92,17 +85,11 @@ func r(a *app.App, root Route) {
 				return
 			}
 
-			if err := a.GitController.UploadPack(
-				ctx, filepath.Join(user, repo), r.Body, w,
-			); errors.Is(err, e.ErrInvalidRepo) {
-				utils.RespMsg(
-					err.Error(),
-					http.StatusNotFound,
-					w,
-				)
-				return
-			} else if err != nil {
-				utils.RespErr(err, w)
+			if !handle(
+				a.GitController.UploadPack(
+					ctx, filepath.Join(user, repo), r.Body, w,
+				), w,
+			) {
 				return
 			}
 		},
@@ -148,17 +135,11 @@ func r(a *app.App, root Route) {
 				return
 			}
 
-			if err := a.GitController.ReceivePack(
-				ctx, filepath.Join(owner, repo), r.Body, w,
-			); errors.Is(err, e.ErrInvalidRepo) {
-				utils.RespMsg(
-					err.Error(),
-					http.StatusNotFound,
-					w,
-				)
-				return
-			} else if err != nil {
-				utils.RespErr(err, w)
+			if !handle(
+				a.GitController.ReceivePack(
+					ctx, filepath.Join(owner, repo), r.Body, w,
+				), w,
+			) {
 				return
 			}
 		}, func(h http.Handler) http.Handler { return middlewares.BasicAuth(h, a) },

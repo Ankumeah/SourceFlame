@@ -7,7 +7,6 @@ import (
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/db"
-	e "github.com/Ankumeah/SourceFlame/internal/errs"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 	"github.com/Ankumeah/SourceFlame/internal/utils"
 )
@@ -36,36 +35,23 @@ func repos(a *app.App, root Route) {
 				return
 			}
 
-			if err := a.DB.AddRepo(
-				ctx,
-				db.Repo{
-					Owner: user,
-					Name:  repo,
-				},
-			); errors.Is(err, e.ErrInvalidUser) {
-				utils.RespMsg(
-					err.Error(),
-					http.StatusNotFound,
-					w,
-				)
-				return
-			} else if errors.Is(err, e.ErrExistsRepo) {
-				utils.RespMsg(
-					err.Error(),
-					http.StatusConflict,
-					w,
-				)
-				return
-			} else if err != nil {
-				utils.RespErr(err, w)
+			if !handle(
+				a.DB.AddRepo(
+					ctx,
+					db.Repo{
+						Owner: user,
+						Name:  repo,
+					},
+				), w,
+			) {
 				return
 			}
 
-			if err := a.GitController.CreateRepo(
-				ctx, filepath.Join(user, repo),
-			); err != nil {
-				utils.RespErr(err, w)
-				a.GitController.DeleteRepo(filepath.Join(user, repo))
+			if !handle(
+				a.GitController.CreateRepo(
+					ctx, filepath.Join(user, repo),
+				), w,
+			) {
 				return
 			}
 
@@ -94,21 +80,15 @@ func repos(a *app.App, root Route) {
 				return
 			}
 
-			if err := a.DB.DeleteRepo(
-				ctx,
-				db.Repo{
-					Owner: user,
-					Name:  repo,
-				},
-			); errors.Is(err, e.ErrInvalidRepo) {
-				utils.RespMsg(
-					err.Error(),
-					http.StatusNotFound,
-					w,
-				)
-				return
-			} else if err != nil {
-				utils.RespErr(err, w)
+			if !handle(
+				a.DB.DeleteRepo(
+					ctx,
+					db.Repo{
+						Owner: user,
+						Name:  repo,
+					},
+				), w,
+			) {
 				return
 			}
 
