@@ -49,3 +49,16 @@ docker run \
 
 ## How to use
 Take a look at `test.d/` and you should get the general idea (actual docs soon)
+
+## Horrible logo, who made it?
+Me! [lapse](https://lapse.hackclub.com/timelapse/fb8y682cSVuR)
+
+## Where is the frontend?
+There isent one (yet)
+
+## I want to contribute
+Sure go ahead, but follow these rules
+
+- use commit prefixes
+- have a fun commit body (optional)
+- AI assisted is allowed, slop written isent
