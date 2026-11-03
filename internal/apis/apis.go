@@ -7,7 +7,7 @@ import (
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 )
 
-func Apis(a *app.App) http.Handler {
+func ServeHTTP(a *app.App) error {
 	mux := http.NewServeMux()
 	route := NewRoute(mux, "/api/"+a.Config.ApiVersion, middlewares.Log)
 
@@ -16,5 +16,5 @@ func Apis(a *app.App) http.Handler {
 	repos(a, route)
 	r(a, route)
 
-	return mux
+	return http.ListenAndServe(a.Config.Host, mux)
 }

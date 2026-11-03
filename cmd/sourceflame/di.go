@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"sync"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/db"
@@ -10,6 +11,24 @@ import (
 	"github.com/Ankumeah/SourceFlame/internal/git"
 	"github.com/Ankumeah/SourceFlame/internal/hash"
 )
+
+func setupDI() *app.App {
+	ctx := context.Background()
+	a := &app.App{}
+
+	loadEnv(a)
+
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		getDB(ctx, a)
+		migrateDB(ctx, a)
+	})
+	wg.Go(func() { getHasher(a) })
+	wg.Go(func() { getGitController(a) })
+	wg.Wait()
+
+	return a
+}
 
 func getDB(ctx context.Context, app *app.App) {
 	log.Println("Getting DB conn")
