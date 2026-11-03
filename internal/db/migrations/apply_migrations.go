@@ -24,16 +24,16 @@ func ApplyMigrations(ctx context.Context, db *sql.DB) (uint64, uint64, error) {
 	// are registered via init functions
 	slices.SortFunc(migrations,
 		func(a migration, b migration) int {
-			if a.Version() > b.Version() {
+			if a.version > b.version {
 				return 1
-			} else if a.Version() < b.Version() {
+			} else if a.version < b.version {
 				return -1
 			} else { // Just put the fries in the bag bro
 				// We use this to exit the function later
 				matchingVersions = errors.New(
 					fmt.Sprintf(
 						"Matching migration numbers: %v and %v\n",
-						a.Version(), b.Version(),
+						a.version, b.version,
 					),
 				)
 				return 0
@@ -46,9 +46,18 @@ func ApplyMigrations(ctx context.Context, db *sql.DB) (uint64, uint64, error) {
 
 	// v0 is applied no matter what so that
 	// `getCurrentMigration` does not fail
-	err := v0{}.Apply(ctx, db)
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
+		return 0, 0, err
+	}
+	defer tx.Rollback()
+
+	if err := v0.apply(ctx, tx); err != nil {
 		return 0, 0, fmt.Errorf("Migration 0: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, 0, err
 	}
 
 	currentVersion, err := getCurrentMigration(ctx, db)
@@ -57,22 +66,23 @@ func ApplyMigrations(ctx context.Context, db *sql.DB) (uint64, uint64, error) {
 	}
 
 	for _, m := range migrations {
-		if m.Version() <= currentVersion {
+		if m.version <= currentVersion {
 			continue
 		}
 
 		if err := func() error {
-			tx, err := db.BeginTx(ctx, &sql.TxOptions{})
+			tx, err := db.BeginTx(ctx, nil)
 			if err != nil {
 				return err
 			}
 			defer tx.Rollback()
 
-			err = m.Apply(ctx, tx)
+			err = m.apply(ctx, tx)
 			if err != nil {
-				return fmt.Errorf("Migration %v: %w", m.Version(), err)
+				return fmt.Errorf("Migration %v: %w", m.version, err)
 			}
-			return nil
+
+			return tx.Commit()
 		}(); err != nil {
 			return 0, 0, err
 		}

@@ -1,28 +1,10 @@
 package migrations
 
-import (
-	"context"
-	"database/sql"
-	"time"
-)
-
 // Adds the `users` and `repos` table
-type v1 struct{}
-
-func init() {
-	migrations = append(migrations, v1{})
-}
-
-func (v1) Version() uint64 {
-	return 1
-}
-
-func (v1) Apply(
-	ctx context.Context,
-	tx *sql.Tx,
-) error {
-	if _, err := tx.ExecContext(
-		ctx, `
+var v1 = migration{
+	version: 1,
+	queries: []string{
+		`
       CREATE TABLE users (
         id        INTEGER   PRIMARY KEY,
         name      TEXT      NOT NULL      UNIQUE,
@@ -30,12 +12,7 @@ func (v1) Apply(
         salt      TEXT      NOT NULL
       );
     `,
-	); err != nil {
-		return err
-	}
-
-	if _, err := tx.ExecContext(
-		ctx, `
+		`
       CREATE TABLE repos (
         id    INTEGER   PRIMARY KEY,
         name  TEXT      NOT NULL,
@@ -44,18 +21,9 @@ func (v1) Apply(
         UNIQUE (owner, name)
       );
     `,
-	); err != nil {
-		return err
-	}
+	},
+}
 
-	if _, err := tx.ExecContext(
-		ctx, `
-      INSERT INTO migrations (version, applied_at)
-      VALUES (1, ?);
-    `, time.Now().Unix(),
-	); err != nil {
-		return err
-	}
-
-	return tx.Commit()
+func init() {
+	migrations = append(migrations, v1)
 }
