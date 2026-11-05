@@ -1,0 +1,41 @@
+:root {
+  color-scheme: light dark;
+  background-color: var(--pri-col);
+}
+
+body {
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+#repo-name {
+  text-align: center;
+}
+
+#meta-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14pt;
+  margin-bottom: 1em;
+}
+
+.code-block {
+  background-color: var(--sec-col);
+  font-size: 12pt;
+  padding: 1em;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pri-col: #171717;
+    --sec-col: #1f1f1f;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --sec-col: #bbb;
+    --pri-col: #eee;
+  }
+}

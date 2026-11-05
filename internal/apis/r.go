@@ -1,11 +1,14 @@
 package apis
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
+	"github.com/Ankumeah/SourceFlame/internal/git"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 	"github.com/Ankumeah/SourceFlame/internal/utils"
 )
@@ -61,6 +64,50 @@ func r(a *app.App, root Route) {
 	)
 
 	route.Handle(
+		"GET /refs",
+		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			refs, err := a.GitController.GetRefs(ctx, filepath.Join(user, repo))
+			if !handle(err, w) {
+				return
+			}
+
+			if !handle(
+				json.NewEncoder(w).Encode(
+					struct {
+						Refs []git.Ref `json:"refs"`
+					}{
+						Refs: refs,
+					},
+				), w,
+			) {
+				return
+			}
+		},
+	)
+
+	route.Handle(
 		"POST /git-upload-pack",
 		func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -92,6 +139,60 @@ func r(a *app.App, root Route) {
 			) {
 				return
 			}
+		},
+	)
+
+	route.Handle(
+		"GET /blob/{file...}",
+		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			file := r.PathValue("file")
+			if strings.TrimSpace(file) == "" {
+				utils.RespMsg(
+					"Empty file path",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			ref := r.URL.Query().Get("ref")
+			if strings.TrimSpace(ref) == "" {
+				utils.RespMsg(
+					"Empty ref",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			content, err := a.GitController.GetBlob(ctx, filepath.Join(user, repo), ref, file)
+			if !handle(err, w) {
+				return
+			}
+
+			w.Write(content)
 		},
 	)
 
