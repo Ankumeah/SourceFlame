@@ -3,6 +3,8 @@ async function main() {
 
   document.getElementById("repo-name").innerText = repo;
 
+  document.title = repo
+
   setClone(repo);
   await loadRefs(repo);
   await loadReadme(repo);
@@ -56,5 +58,5 @@ async function loadRefs(repo) {
 
 window.addEventListener(
   "DOMContentLoaded",
-  () => main()
+  main
 );
