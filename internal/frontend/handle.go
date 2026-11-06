@@ -9,6 +9,6 @@ import (
 )
 
 func Handle(app *app.App, mux *http.ServeMux) {
-  home.Handle(app, mux)
+	home.Handle(app, mux)
 	repo.Handle(app, mux)
 }
