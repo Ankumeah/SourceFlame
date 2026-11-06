@@ -32,4 +32,12 @@ func Handle(app *app.App, mux *http.ServeMux) {
 			w.Write(script)
 		},
 	)
+
+	mux.HandleFunc(
+		"GET "+prefix+"/favicon.ico",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Content-Type", "image/x-icon")
+			w.Write(favicon)
+		},
+	)
 }
