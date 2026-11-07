@@ -36,6 +36,8 @@ mkdir -p build/repos
 ```
 
 or
+> [!NOTE]
+> Pre build docker images are build to latest tag, not commit
 
 ```sh
 docker build -t sf .

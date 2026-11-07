@@ -12,7 +12,7 @@ func Log(next http.Handler) http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			log.Printf(
 				"%s %s %s\n",
-				r.RemoteAddr, r.Method, r.URL.Path,
+				r.RemoteAddr, r.Method, r.RequestURI,
 			)
 
 			next.ServeHTTP(w, r)

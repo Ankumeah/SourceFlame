@@ -6,7 +6,7 @@ async function main() {
   document.title = repo
 
   setClone(repo);
-  await loadRefs(repo);
+  if (await loadRefs(repo)) { return }
   await loadReadme(repo);
 }
 
@@ -15,6 +15,13 @@ function setClone(repo) {
 }
 
 async function loadReadme(repo) {
+
+  let ref = document.getElementById("ref-selector").value;
+  if (!ref) {
+    document.getElementById("readme").innerText = "Select a valid ref";
+    return
+  }
+
   let text = ""
 
   const res = await fetch(
@@ -36,6 +43,10 @@ async function loadReadme(repo) {
 
 async function loadRefs(repo) {
   const res = await fetch(`${location.origin}/api/v1/r/${repo}/refs`);
+  if (res.status === 404 || res.status === 400) {
+    setInvalidRepo();
+    return true;
+  }
   if (!res.ok) {
     throw new Error(`Error loading refs: ${res.status}`);
   }
@@ -48,12 +59,27 @@ async function loadRefs(repo) {
     console.log(`Invalid json from refs api: ${err}`);
   }
 
+  if (refs.refs.length < 1) {
+    refs.refs = [{ name: "None", hash: "" }];
+  }
+
   let opts = "";
   refs.refs.forEach(function(ref) {
     opts += `<option value="${ref.hash}">${ref.name}</option>`;
   });
 
   document.getElementById("ref-selector").innerHTML = opts;
+
+  return false;
+}
+
+function setInvalidRepo() {
+  document.title = "Invalid repo";
+  document.getElementById("repo-name").innerText = "Invalid repo";
+  document.getElementById("clone-link").hidden = true;
+  document.getElementById("ref-selector").hidden = true;
+  document.getElementById("readme-label").hidden = true;
+  document.getElementById("readme-block").hidden = true;
 }
 
 window.addEventListener(
