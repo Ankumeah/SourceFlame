@@ -9,8 +9,8 @@ import (
 	"github.com/Ankumeah/SourceFlame/internal/utils"
 )
 
-const UserKey = Key("user")
-const PassKey = Key("pass")
+const UserKey = Key("basic_auth_user")
+const PassKey = Key("basic_auth_pass")
 
 func ParseBasicAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(

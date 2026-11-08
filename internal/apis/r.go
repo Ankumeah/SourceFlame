@@ -64,6 +64,91 @@ func r(a *app.App, root Route) {
 	)
 
 	route.Handle(
+		"POST /git-upload-pack",
+		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			if !handle(
+				a.GitController.UploadPack(
+					ctx, filepath.Join(user, repo), r.Body, w,
+				), w,
+			) {
+				return
+			}
+		},
+	)
+
+	route.Handle(
+		"POST /git-receive-pack",
+		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			owner := r.PathValue("user")
+			if !utils.IsValidName(owner) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			user, ok := ctx.Value(middlewares.UserKey).(string)
+			if !ok {
+				utils.RespErr(errors.New("user set by middleware not string"), w)
+				return
+			}
+
+			if user != owner {
+				utils.RespMsg(
+					"Must be owner to push",
+					http.StatusForbidden,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			if !handle(
+				a.GitController.ReceivePack(
+					ctx, filepath.Join(owner, repo), r.Body, w,
+				), w,
+			) {
+				return
+			}
+		}, func(h http.Handler) http.Handler { return middlewares.BasicAuth(h, a) },
+	)
+
+	route.Handle(
 		"GET /refs",
 		func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -97,44 +182,7 @@ func r(a *app.App, root Route) {
 				json.NewEncoder(w).Encode(
 					struct {
 						Refs []git.Ref `json:"refs"`
-					}{
-						Refs: refs,
-					},
-				), w,
-			) {
-				return
-			}
-		},
-	)
-
-	route.Handle(
-		"POST /git-upload-pack",
-		func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-
-			user := r.PathValue("user")
-			if !utils.IsValidName(user) {
-				utils.RespMsg(
-					"Invalid username",
-					http.StatusBadRequest,
-					w,
-				)
-				return
-			}
-
-			repo := r.PathValue("repo")
-			if !utils.IsValidName(repo) {
-				utils.RespMsg(
-					"Invalid repo name",
-					http.StatusBadRequest,
-					w,
-				)
-				return
-			}
-
-			if !handle(
-				a.GitController.UploadPack(
-					ctx, filepath.Join(user, repo), r.Body, w,
+					}{refs},
 				), w,
 			) {
 				return
@@ -197,30 +245,23 @@ func r(a *app.App, root Route) {
 	)
 
 	route.Handle(
-		"POST /git-receive-pack",
+		"GET /commits",
 		func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-
-			owner := r.PathValue("user")
-			if !utils.IsValidName(owner) {
+			ref := r.URL.Query().Get("ref")
+			if strings.TrimSpace(ref) == "" {
 				utils.RespMsg(
-					"Invalid username",
+					"Empty ref",
 					http.StatusBadRequest,
 					w,
 				)
 				return
 			}
 
-			user, ok := ctx.Value(middlewares.UserKey).(string)
-			if !ok {
-				utils.RespErr(errors.New("user set by middleware not string"), w)
-				return
-			}
-
-			if user != owner {
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
 				utils.RespMsg(
-					"Must be owner to push",
-					http.StatusForbidden,
+					"Invalid username",
+					http.StatusBadRequest,
 					w,
 				)
 				return
@@ -236,13 +277,20 @@ func r(a *app.App, root Route) {
 				return
 			}
 
+			commits, err := a.GitController.GetCommits(filepath.Join(user, repo), ref)
+			if !handle(err, w) {
+				return
+			}
+
 			if !handle(
-				a.GitController.ReceivePack(
-					ctx, filepath.Join(owner, repo), r.Body, w,
+				json.NewEncoder(w).Encode(
+					struct {
+						Commits []git.Commit `json:"commits"`
+					}{commits},
 				), w,
 			) {
 				return
 			}
-		}, func(h http.Handler) http.Handler { return middlewares.BasicAuth(h, a) },
+		},
 	)
 }

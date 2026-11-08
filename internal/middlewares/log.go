@@ -5,8 +5,6 @@ import (
 	"net/http"
 )
 
-const ErrorsKey = Key("errors")
-
 func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
