@@ -244,9 +244,14 @@ func r(a *app.App, root Route) {
 		},
 	)
 
+	// Funny story, orignally this was supposed to be
+	// mounted at /log but while testing I got blocked
+	// by my own adblock and so here we are
 	route.Handle(
-		"GET /commits",
+		"GET /git-log",
 		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
 			ref := r.URL.Query().Get("ref")
 			if strings.TrimSpace(ref) == "" {
 				utils.RespMsg(
@@ -277,20 +282,12 @@ func r(a *app.App, root Route) {
 				return
 			}
 
-			commits, err := a.GitController.GetCommits(filepath.Join(user, repo), ref)
+			log, err := a.GitController.GetLog(ctx, filepath.Join(user, repo), ref)
 			if !handle(err, w) {
 				return
 			}
 
-			if !handle(
-				json.NewEncoder(w).Encode(
-					struct {
-						Commits []git.Commit `json:"commits"`
-					}{commits},
-				), w,
-			) {
-				return
-			}
+			w.Write(log)
 		},
 	)
 }

@@ -7,7 +7,9 @@ async function main() {
 
   setClone(repo);
   if (await loadRefs(repo)) { return }
-  await loadReadme(repo);
+
+  loadReadme(repo);
+  loadLog(repo);
 }
 
 function setClone(repo) {
@@ -73,13 +75,26 @@ async function loadRefs(repo) {
   return false;
 }
 
+async function loadLog(repo) {
+  const res = await fetch(
+    `${location.origin}/api/v1/r/` +
+    `${repo}/git-log?ref=` +
+    `${document.getElementById("ref-selector").value}`
+  );
+  if (res === 404) {
+    document.getElementById("commits").innerHTML = "No log";
+    return
+  } else if (!res.ok) {
+    throw new Error(`Error loading log: ${res.status}`);
+  }
+
+  document.getElementById("log").innerText = await res.text();
+}
+
 function setInvalidRepo() {
   document.title = "Invalid repo";
   document.getElementById("repo-name").innerText = "Invalid repo";
-  document.getElementById("clone-link").hidden = true;
-  document.getElementById("ref-selector").hidden = true;
-  document.getElementById("readme-label").hidden = true;
-  document.getElementById("readme-block").hidden = true;
+  document.getElementById("info").hidden = true;
 }
 
 window.addEventListener(

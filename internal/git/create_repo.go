@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 )
 
+// WARNING: This delete any repo that may
+// have existed at the provided path
 func (g GitController) CreateRepo(
 	ctx context.Context,
 	path string,

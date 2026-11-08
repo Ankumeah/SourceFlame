@@ -23,6 +23,13 @@ func handle(err error, w http.ResponseWriter) bool {
 			w,
 		)
 		return false
+	} else if errors.Is(err, errs.ErrNotExist) {
+		utils.RespMsg(
+			err.Error(),
+			http.StatusNotFound,
+			w,
+		)
+		return false
 	} else if err != nil {
 		utils.RespErr(err, w)
 		return false
