@@ -14,14 +14,16 @@ of better design decisions
 > [!NOTE]
 > Make sure to check and edit env.example to your use
 
+> [!NOTE]
+> Pre build docker images are build to latest tag, not commit
 ```sh
-docker pull sourceflame:v0.1.0
+docker pull sourceflame
 
 docker run \
   --name sf \
   --env-file env.example \
   --volume ./data:/opt/sf/build/repos \
-  sourceflame:v0.1.0
+  sourceflame
 ```
 
 or
@@ -36,8 +38,6 @@ mkdir -p build/repos
 ```
 
 or
-> [!NOTE]
-> Pre build docker images are build to latest tag, not commit
 
 ```sh
 docker build -t sf .
