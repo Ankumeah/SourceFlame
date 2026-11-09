@@ -1,9 +1,9 @@
 package git
 
 type File struct {
-	Name string `json:"name"`
-	Perm uint   `json:"perm"`
-	Dir  bool   `json:"dir"`
+	Name   string `json:"name"`
+	Dir    bool   `json:"dir"`
+	Submod bool   `json:"submod"`
 }
 
 type Ref struct {

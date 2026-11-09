@@ -10,6 +10,7 @@ async function main() {
 
   loadReadme(repo);
   loadLog(repo);
+  loadTree(repo);
 }
 
 function setClone(repo) {
@@ -82,13 +83,43 @@ async function loadLog(repo) {
     `${document.getElementById("ref-selector").value}`
   );
   if (res === 404) {
-    document.getElementById("commits").innerHTML = "No log";
+    document.getElementById("log").innerHTML = "No log";
     return
   } else if (!res.ok) {
     throw new Error(`Error loading log: ${res.status}`);
   }
 
   document.getElementById("log").innerText = await res.text();
+}
+
+async function loadTree(repo) {
+  const res = await fetch(
+    `${location.origin}/api/v1/r/` +
+    `${repo}/tree/?ref=` +
+    `${document.getElementById("ref-selector").value}`
+  );
+  if (!res.ok) {
+    throw new Error(`Error loading tree: ${res.status}`);
+  }
+
+  let text = "";
+
+  let tree = {};
+  try {
+    tree = await res.json();
+  } catch (err) {
+    console.log(`Invalid json from tree api: ${err}`);
+  }
+
+  if (tree.files.length < 1) {
+    text = "No files in tree"
+  } else {
+    for (let file of tree.files) {
+      text += `${file.name}\n`
+    }
+  }
+
+  document.getElementById("tree").innerText = text;
 }
 
 function setInvalidRepo() {

@@ -290,4 +290,56 @@ func r(a *app.App, root Route) {
 			w.Write(log)
 		},
 	)
+
+	route.Handle(
+		"GET /tree/{dir...}",
+		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			ref := r.URL.Query().Get("ref")
+			if strings.TrimSpace(ref) == "" {
+				utils.RespMsg(
+					"Empty ref",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			dir := r.PathValue("dir")
+
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			files, err := a.GitController.GetTree(ctx, filepath.Join(user, repo), ref, dir)
+			if !handle(err, w) {
+				return
+			}
+
+			handle(
+				json.NewEncoder(w).Encode(
+					struct {
+						Files []git.File `json:"files"`
+					}{files},
+				), w,
+			)
+		},
+	)
 }
