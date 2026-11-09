@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: SourceFlame routes
+  version: "v0.1.0"
+
+servers:
+  - url: localhost:8000
+
+security: []
+
+paths:
+  /:
+    get:
+      operationId: getRoot
+      responses:
+        "200":
+          description: Success
+
+  /r/{user}/{repo}:
+    get:
+      operationId: getRepository
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+      responses:
+        "200":
+          description: Success
+
+  /r/{user}/{repo}/info/refs:
+    servers:
+      - url: /
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    get:
+      operationId: gitRefs
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+        - $ref: "#/components/parameters/GitService"
+      responses:
+        "200":
+          description: Git service advertisement
+
+  /r/{user}/{repo}/git-upload-pack:
+    servers:
+      - url: /
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    post:
+      operationId: gitUploadPack
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+      requestBody:
+        $ref: "#/components/requestBodies/UploadPackRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/UploadPackResponse"
+
+  /r/{user}/{repo}/git-receive-pack:
+    servers:
+      - url: /
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    post:
+      operationId: gitReceivePack
+      security:
+        - basicAuth: []
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+      requestBody:
+        $ref: "#/components/requestBodies/ReceivePackRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ReceivePackResponse"
+
+  /ping:
+    servers:
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    get:
+      operationId: ping
+      responses:
+        "200":
+          description: Success
+
+  /acc:
+    servers:
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    post:
+      operationId: createAccount
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: Success
+    patch:
+      operationId: updateAccount
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Success
+    delete:
+      operationId: deleteAccount
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: Success
+
+  /r/{user}/{repo}/refs:
+    servers:
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    get:
+      operationId: listRefs
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+      responses:
+        "200":
+          description: Repository refs
+
+  /r/{user}/{repo}/blob/{file}:
+    servers:
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    get:
+      operationId: getBlob
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+        - $ref: "#/components/parameters/Ref"
+        - name: file
+          in: path
+          required: true
+          description: File path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File contents
+
+  /r/{user}/{repo}/git-log:
+    servers:
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    get:
+      operationId: getGitLog
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+        - $ref: "#/components/parameters/Ref"
+      responses:
+        "200":
+          description: Repository commit history
+
+  /r/{user}/{repo}/tree/{dir}:
+    servers:
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    get:
+      operationId: getTree
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+        - $ref: "#/components/parameters/Ref"
+        - name: dir
+          in: path
+          required: true
+          description: Directory path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Directory contents
+
+  /repos/{repo}:
+    servers:
+      - url: /api/{apiVersion}
+        variables:
+          apiVersion:
+            default: v1
+    post:
+      operationId: createRepository
+      security:
+        - basicAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Repo"
+      responses:
+        "200":
+          description: Success
+    delete:
+      operationId: deleteRepository
+      security:
+        - basicAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Repo"
+      responses:
+        "200":
+          description: Success
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+    User:
+      name: user
+      in: path
+      required: true
+      schema:
+        type: string
+
+    Repo:
+      name: repo
+      in: path
+      required: true
+      schema:
+        type: string
+
+    Ref:
+      name: ref
+      in: query
+      required: true
+      schema:
+        type: string
+
+    GitService:
+      name: service
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - git-receive-pack
+          - git-upload-pack
+
+  requestBodies:
+    UploadPackRequest:
+      required: true
+      content:
+        application/x-git-upload-pack-request:
+          schema:
+            type: string
+            format: binary
+
+    ReceivePackRequest:
+      required: true
+      content:
+        application/x-git-receive-pack-request:
+          schema:
+            type: string
+            format: binary
+
+  responses:
+    UploadPackResponse:
+      description: Git upload-pack response
+      content:
+        application/x-git-upload-pack-result:
+          schema:
+            type: string
+            format: binary
+
+    ReceivePackResponse:
+      description: Git receive-pack response
+      content:
+        application/x-git-receive-pack-result:
+          schema:
+            type: string
+            format: binary
