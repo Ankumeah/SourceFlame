@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: SourceFlame routes
-  version: "v0.1.0"
+  version: "v0.2.0"
 
 servers:
   - url: localhost:8000
