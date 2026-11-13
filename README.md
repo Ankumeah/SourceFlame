@@ -10,9 +10,12 @@ After looking back at it, it swayed too much from its goal of minimalism and I
 decided to do a from scratch rewrite with all my new knowledge of softwear in hopes
 of better design decisions
 
+## Lastest release
+[v0.2.0](https://github.com/Ankumeah/SourceFlame/releases/tag/v0.2.0)
+
 ## How to run
 > [!NOTE]
-> Make sure to check and edit env.example to your use
+> Make sure to check and edit `env.example` to your use
 
 > [!NOTE]
 > Pre build docker images are build to latest tag, not commit
@@ -50,7 +53,8 @@ docker run \
 ```
 
 ## How to use
-Take a look at `test.d/` and you should get the general idea (actual docs soon)
+- Take a look at `test.d/` and you should get the general idea
+- There is an informal spec at `routes.md` as well as a formal `openapi.yaml`
 
 ## Horrible logo, who made it?
 Me! [lapse](https://lapse.hackclub.com/timelapse/fb8y682cSVuR)
