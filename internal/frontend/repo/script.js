@@ -115,7 +115,13 @@ async function loadTree(repo) {
     text = "No files in tree"
   } else {
     for (let file of tree.files) {
-      text += `${file.name}\n`
+      text += file.name
+
+      if (file.dir || file.submod) {
+        text += "/"
+      }
+
+      text += "\n"
     }
   }
 
