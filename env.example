@@ -1,3 +1,4 @@
+DEFAULT_USER=user
 HOST=0.0.0.0:8000
 DB_URL=./build/repos/sf.db
 REPOS_PATH=./build/repos/

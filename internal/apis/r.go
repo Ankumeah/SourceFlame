@@ -15,6 +15,7 @@ import (
 
 func r(a *app.App, root Route) {
 	route := root.Sub("/r/{user}/{repo}")
+	defaultRoute := root.Sub("/r/{path}")
 
 	route.Handle(
 		"GET /info/refs",
@@ -339,6 +340,26 @@ func r(a *app.App, root Route) {
 						Files []git.File `json:"files"`
 					}{files},
 				), w,
+			)
+		},
+	)
+
+	defaultRoute.Base(
+		"",
+		func(w http.ResponseWriter, r *http.Request) {
+			if a.Config.DefaultUser == "" {
+				utils.RespMsg(
+					"No default user",
+					http.StatusNotFound,
+					w,
+				)
+				return
+			}
+
+			http.Redirect(
+				w, r,
+				"/r/"+a.Config.DefaultUser+"/"+r.PathValue("path"),
+				http.StatusTemporaryRedirect,
 			)
 		},
 	)

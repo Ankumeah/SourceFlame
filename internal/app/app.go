@@ -7,10 +7,12 @@ import (
 )
 
 type Config struct {
-	Host       string
-	DBURL      string
-	ReposPath  string
-	HashConfig string
+	Host        string
+	DBURL       string
+	ReposPath   string
+	HashConfig  string
+	DefaultUser string
+	LockUsers   bool
 }
 
 type App struct {

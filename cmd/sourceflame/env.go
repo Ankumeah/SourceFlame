@@ -15,6 +15,11 @@ var envVars = map[string]string{
 	"HASH_CONFIG": "",
 }
 
+// Like envVars but for optional vars
+var optionalEnvVars = map[string]string{
+	"DEFAULT_USER": "",
+}
+
 // Loads all needed env vars into passsed config.
 // Exits program on first unset env var
 func loadEnv(app *app.App) {
@@ -28,6 +33,11 @@ func loadEnv(app *app.App) {
 		}
 		envVars[env] = _env
 	}
+
+	for env := range optionalEnvVars {
+		optionalEnvVars[env] = os.Getenv(env)
+	}
+
 	setSettings(app)
 
 	log.Println("Loaded env")
@@ -39,4 +49,7 @@ func setSettings(app *app.App) {
 	app.Config.DBURL = envVars["DB_URL"]
 	app.Config.ReposPath = envVars["REPOS_PATH"]
 	app.Config.HashConfig = envVars["HASH_CONFIG"]
+
+	app.Config.DefaultUser = optionalEnvVars["DEFAULT_USER"]
+	app.Config.LockUsers = optionalEnvVars["LOCK_USERS"] != ""
 }
