@@ -23,7 +23,12 @@ body {
 }
 
 .code-block {
-  overflow-wrap: anywhere;
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  overflow: auto;
+  white-space: pre;
   background-color: var(--sec-col);
   font-size: 12pt;
   padding: 1em;
