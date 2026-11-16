@@ -1,3 +1,3 @@
 #! /bin/sh
 
-curl "http://$HOST/api/$API_VERSION/r/user/test/tree/?ref=$1"
+curl "http://$HOST/r/user/test/tree/?ref=$1"

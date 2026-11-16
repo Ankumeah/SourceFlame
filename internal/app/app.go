@@ -7,7 +7,6 @@ import (
 )
 
 type Config struct {
-	ApiVersion string
 	Host       string
 	DBURL      string
 	ReposPath  string

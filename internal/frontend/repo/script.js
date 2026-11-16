@@ -14,7 +14,7 @@ async function main() {
 }
 
 function setClone(repo) {
-  document.getElementById("clone-link").innerText = location.origin + "/api/v1/r/" + repo;
+  document.getElementById("clone-link").innerText = location.origin + "/r/" + repo;
 }
 
 async function loadReadme(repo) {
@@ -28,7 +28,7 @@ async function loadReadme(repo) {
   let text = ""
 
   const res = await fetch(
-    `${location.origin}/api/v1/r/` +
+    `${location.origin}/r/` +
     `${repo}/blob/README.md?ref=` +
     `${document.getElementById("ref-selector").value}`,
   );
@@ -45,7 +45,7 @@ async function loadReadme(repo) {
 }
 
 async function loadRefs(repo) {
-  const res = await fetch(`${location.origin}/api/v1/r/${repo}/refs`);
+  const res = await fetch(`${location.origin}/r/${repo}/refs`);
   if (res.status === 404 || res.status === 400) {
     setInvalidRepo();
     return true;
@@ -78,7 +78,7 @@ async function loadRefs(repo) {
 
 async function loadLog(repo) {
   const res = await fetch(
-    `${location.origin}/api/v1/r/` +
+    `${location.origin}/r/` +
     `${repo}/git-log?ref=` +
     `${document.getElementById("ref-selector").value}`
   );
@@ -94,7 +94,7 @@ async function loadLog(repo) {
 
 async function loadTree(repo) {
   const res = await fetch(
-    `${location.origin}/api/v1/r/` +
+    `${location.origin}/r/` +
     `${repo}/tree/?ref=` +
     `${document.getElementById("ref-selector").value}`
   );

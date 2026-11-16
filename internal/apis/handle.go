@@ -7,10 +7,12 @@ import (
 )
 
 func Handle(a *app.App, mux *http.ServeMux) {
-	route := NewRoute(mux, "/api/"+a.Config.ApiVersion)
+	apiRoute := NewRoute(mux, "/api")
+	baseRoute := NewRoute(mux, "")
 
-	ping(a, route)
-	acc(a, route)
-	repos(a, route)
-	r(a, route)
+	ping(a, apiRoute)
+	acc(a, apiRoute)
+	repos(a, apiRoute)
+
+	r(a, baseRoute)
 }

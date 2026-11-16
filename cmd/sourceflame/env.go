@@ -9,9 +9,7 @@ import (
 
 // Temprory map to store type unsafe env vars
 var envVars = map[string]string{
-	"API_VERSION": "",
 	"HOST":        "",
-
 	"DB_URL":      "",
 	"REPOS_PATH":  "",
 	"HASH_CONFIG": "",
@@ -37,9 +35,7 @@ func loadEnv(app *app.App) {
 
 // Loads the type unsafe map into the type safe config
 func setSettings(app *app.App) {
-	app.Config.ApiVersion = envVars["API_VERSION"]
 	app.Config.Host = envVars["HOST"]
-
 	app.Config.DBURL = envVars["DB_URL"]
 	app.Config.ReposPath = envVars["REPOS_PATH"]
 	app.Config.HashConfig = envVars["HASH_CONFIG"]
