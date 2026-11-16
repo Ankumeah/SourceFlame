@@ -14,17 +14,17 @@ spec is AI generated with this file as the example
 | GET    | `/r/{user}/{repo}/info/refs`                        | `service` (`git-receive-pack` \| `git-upload-pack`)   |                                                  |                   |
 | POST   | `/r/{user}/{repo}/git-upload-pack`                  |                                                       |                                                  | Git stuff idk     |
 | POST   | `/r/{user}/{repo}/git-receive-pack`                 |                                                       | `Authorization (Basic base64(user:pass))`        | Git stuff idk     |
-| GET    | `/api/$API_VERSION/ping`                            |                                                       |                                                  |                   |
-| POST   | `/api/$API_VERSION/acc`                             |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
-| PATCH  | `/api/$API_VERSION/acc`                             |                                                       | `Authorization (Basic base64(user:pass))`        | `{ "email": "" }` |
-| DELETE | `/api/$API_VERSION/acc`                             |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
-| GET    | `/api/$API_VERSION/r/{user}/{repo}/info/refs`       | `service` (`git-receive-pack` \| `git-upload-pack`)   |                                                  |                   |
-| POST   | `/api/$API_VERSION/r/{user}/{repo}/git-upload-pack` |                                                       |                                                  | Git stuff idk     |
-| POST   | `/api/$API_VERSION/r/{user}/{repo}/git-receive-pack`|                                                       | `Authorization (Basic base64(user:pass))`        | Git stuff idk     |
-| GET    | `/api/$API_VERSION/r/{user}/{repo}/refs`            |                                                       |                                                  |                   |
-| GET    | `/api/$API_VERSION/r/{user}/{repo}/blob/{file...}`  | `ref`                                                 |                                                  |                   |
-| GET    | `/api/$API_VERSION/r/{user}/{repo}/git-log`         | `ref`                                                 |                                                  |                   |
-| GET    | `/api/$API_VERSION/r/{user}/{repo}/tree/{dir...}`   | `ref`                                                 |                                                  |                   |
-| POST   | `/api/$API_VERSION/repos/{repo}`                    |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
-| DELETE | `/api/$API_VERSION/repos/{repo}`                    |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
+| GET    | `/r/{user}/{repo}/info/refs`       | `service` (`git-receive-pack` \| `git-upload-pack`)   |                                                  |                   |
+| POST   | `/r/{user}/{repo}/git-upload-pack` |                                                       |                                                  | Git stuff idk     |
+| POST   | `/r/{user}/{repo}/git-receive-pack`|                                                       | `Authorization (Basic base64(user:pass))`        | Git stuff idk     |
+| GET    | `/r/{user}/{repo}/refs`            |                                                       |                                                  |                   |
+| GET    | `/r/{user}/{repo}/blob/{file...}`  | `ref`                                                 |                                                  |                   |
+| GET    | `/r/{user}/{repo}/git-log`         | `ref`                                                 |                                                  |                   |
+| GET    | `/r/{user}/{repo}/tree/{dir...}`   | `ref`                                                 |                                                  |                   |
+| GET    | `/api/ping`                            |                                                       |                                                  |                   |
+| POST   | `/api/acc`                             |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
+| PATCH  | `/api/acc`                             |                                                       | `Authorization (Basic base64(user:pass))`        | `{ "email": "" }` |
+| DELETE | `/api/acc`                             |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
+| POST   | `/api/repos/{repo}`                    |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
+| DELETE | `/api/repos/{repo}`                    |                                                       | `Authorization (Basic base64(user:pass))`        |                   |
 

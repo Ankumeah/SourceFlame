@@ -55,6 +55,9 @@ docker run \
 ## How to use
 - Take a look at `test.d/` and you should get the general idea
 - There is an informal spec at `routes.md` as well as a formal `openapi.yaml`
+> [!WARNING]
+> The formal spec is only updated (with AI) before every major release, look at the informal
+spec to be up to date with git
 
 ## Horrible logo, who made it?
 Me! [lapse](https://lapse.hackclub.com/timelapse/fb8y682cSVuR)
