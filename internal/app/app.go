@@ -2,8 +2,10 @@ package app
 
 import (
 	"github.com/Ankumeah/SourceFlame/internal/db"
+	"github.com/Ankumeah/SourceFlame/internal/email"
 	"github.com/Ankumeah/SourceFlame/internal/git"
 	"github.com/Ankumeah/SourceFlame/internal/hash"
+	"github.com/Ankumeah/SourceFlame/internal/otp"
 )
 
 type Config struct {
@@ -13,6 +15,10 @@ type Config struct {
 	HashConfig  string
 	DefaultUser string
 	LockUsers   bool
+
+	EmailURL  string
+	EmailUser string
+	EmailPass string
 }
 
 type App struct {
@@ -20,4 +26,6 @@ type App struct {
 	Hasher        hash.Hasher
 	GitController git.GitController
 	DB            *db.DBController
+	OTPManager    *otp.OTPManager
+	EmailManager  email.EmailManager
 }

@@ -17,6 +17,16 @@ func acc(a *app.App, root Route) {
 	parsed.Base(
 		"POST",
 		func(w http.ResponseWriter, r *http.Request) {
+			if a.Config.LockUsers {
+				utils.RespMsg(
+					"No new users allowed",
+					http.StatusForbidden,
+					w,
+				)
+
+				return
+			}
+
 			ctx := r.Context()
 
 			user, ok := ctx.Value(middlewares.UserKey).(string)
@@ -58,6 +68,7 @@ func acc(a *app.App, root Route) {
 
 			request := struct {
 				Email string `json:"email"`
+				OTP   *uint  `json:"otp"`
 			}{}
 
 			if r.Body == nil {
@@ -76,6 +87,30 @@ func acc(a *app.App, root Route) {
 					http.StatusBadRequest,
 					w,
 				)
+				return
+			}
+
+			if request.OTP == nil {
+				otp, err := a.OTPManager.NewOTP(request.Email)
+				if !handle(err, w) {
+					return
+				}
+
+				if !handle(a.EmailManager.SendEmail(ctx, request.Email, otp.GetEmailContent()), w) {
+					return
+				}
+
+				w.WriteHeader(http.StatusAccepted)
+				return
+			}
+
+			if !a.OTPManager.CheckOTP(request.Email, *request.OTP) {
+				utils.RespMsg(
+					"Invalid OTP",
+					http.StatusForbidden,
+					w,
+				)
+
 				return
 			}
 

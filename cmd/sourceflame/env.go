@@ -13,11 +13,16 @@ var envVars = map[string]string{
 	"DB_URL":      "",
 	"REPOS_PATH":  "",
 	"HASH_CONFIG": "",
+
+	"EMAIL_URL":  "",
+	"EMAIL_USER": "",
+	"EMAIL_PASS": "",
 }
 
 // Like envVars but for optional vars
 var optionalEnvVars = map[string]string{
 	"DEFAULT_USER": "",
+	"LOCK_USERS":   "",
 }
 
 // Loads all needed env vars into passsed config.
@@ -49,6 +54,10 @@ func setSettings(app *app.App) {
 	app.Config.DBURL = envVars["DB_URL"]
 	app.Config.ReposPath = envVars["REPOS_PATH"]
 	app.Config.HashConfig = envVars["HASH_CONFIG"]
+
+	app.Config.EmailURL = envVars["EMAIL_URL"]
+	app.Config.EmailUser = envVars["EMAIL_USER"]
+	app.Config.EmailPass = envVars["EMAIL_PASS"]
 
 	app.Config.DefaultUser = optionalEnvVars["DEFAULT_USER"]
 	app.Config.LockUsers = optionalEnvVars["LOCK_USERS"] != ""
