@@ -25,7 +25,8 @@ docker pull sourceflame
 docker run \
   --name sf \
   --env-file env.example \
-  --volume ./data:/opt/sf/build/repos \
+  --volume ./data/db/:/opt/sf/build/db/ \
+  --volume ./data/repos/:/opt/sf/build/repos/ \
   sourceflame
 ```
 
@@ -48,7 +49,8 @@ docker build -t sf .
 docker run \
   --name sf \
   --env-file env.example \
-  --volume ./data:/opt/sf/build/repos \
+  --volume ./data/db/:/opt/sf/build/db/ \
+  --volume ./data/repos/:/opt/sf/build/repos/ \
   sf
 ```
 
