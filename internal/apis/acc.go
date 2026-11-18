@@ -67,8 +67,9 @@ func acc(a *app.App, root Route) {
 			}
 
 			request := struct {
-				Email string `json:"email"`
-				OTP   *uint  `json:"otp"`
+				Email  *string `json:"email"`
+				PubKey *string `json:"pub_key"`
+				OTP    *uint   `json:"otp"`
 			}{}
 
 			if r.Body == nil {
@@ -90,35 +91,55 @@ func acc(a *app.App, root Route) {
 				return
 			}
 
-			if request.OTP == nil {
-				otp, err := a.OTPManager.NewOTP(request.Email)
+			if request.Email != nil && request.OTP == nil {
+				otp, err := a.OTPManager.NewOTP(*request.Email)
 				if !handle(err, w) {
 					return
 				}
 
-				if !handle(a.EmailManager.SendEmail(ctx, request.Email, otp.GetEmailContent()), w) {
+				if !handle(a.EmailManager.SendEmail(ctx, *request.Email, otp.GetEmailContent()), w) {
 					return
 				}
 
 				w.WriteHeader(http.StatusAccepted)
 				return
-			}
+			} else if request.PubKey != nil {
+				handle(a.DB.ChangePubKey(ctx, user, *request.PubKey), w)
+				return
+			} else if request.OTP != nil {
+				if request.Email == nil {
+					utils.RespMsg(
+						"No email provided",
+						http.StatusBadRequest,
+						w,
+					)
+					return
+				}
 
-			if !a.OTPManager.CheckOTP(request.Email, *request.OTP) {
+				if !a.OTPManager.CheckOTP(*request.Email, *request.OTP) {
+					utils.RespMsg(
+						"Invalid OTP",
+						http.StatusForbidden,
+						w,
+					)
+
+					return
+				}
+
+				if !handle(a.DB.ChangeEmail(ctx, user, *request.Email), w) {
+					return
+				}
+
+				w.WriteHeader(http.StatusOK)
+				return
+			} else {
 				utils.RespMsg(
-					"Invalid OTP",
-					http.StatusForbidden,
+					"No oprations possible with given data",
+					http.StatusBadRequest,
 					w,
 				)
-
 				return
 			}
-
-			if !handle(a.DB.ChangeEmail(ctx, user, request.Email), w) {
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
 		},
 	)
 

@@ -60,6 +60,34 @@ func (db *DBController) ChangeEmail(ctx context.Context, user string, email stri
 	return nil
 }
 
+// Change a user's public key
+//
+// May return the following errors:
+//   - `errs.ErrInvalidUser`
+//   - Errors by the underlying DB
+func (db *DBController) ChangePubKey(ctx context.Context, user string, key string) error {
+	info, err := db.db.ExecContext(
+		ctx, `
+      UPDATE users
+      SET pub_key = ?
+      WHERE name = ?;
+    `, key, user,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	affected, err := info.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected < 1 {
+		return errs.ErrInvalidUser
+	}
+
+	return nil
+}
+
 // Delete a user
 //
 // May return the following errors:
@@ -129,4 +157,26 @@ func (db *DBController) GetUserByEmail(ctx context.Context, email string) (strin
 	}
 
 	return user, err
+}
+
+// Get a the public key associated with a email
+//
+// May return the following errors:
+//   - `errs.ErrInvalidEmail`
+//   - Errors by the underlying DB
+func (db *DBController) GetPubKey(ctx context.Context, email string) (string, error) {
+	var key string
+
+	err := db.db.QueryRowContext(
+		ctx, `
+      SELECT pub_key FROM users
+      WHERE email = ?;
+    `, email,
+	).Scan(&key)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		err = errs.ErrInvalidEmail
+	}
+
+	return key, err
 }
