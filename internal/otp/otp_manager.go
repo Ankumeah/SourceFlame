@@ -84,6 +84,6 @@ func (o *OTPManager) startCleaner() {
 	}
 }
 
-func (o *OTP) GetEmailContent() []byte {
-	return []byte(fmt.Sprintf(otpEmailContent, o.otp, otpLifetime))
+func (o *OTP) GetEmailContent(user string) []byte {
+	return []byte(fmt.Sprintf(otpEmailContent, user, o.otp, otpLifetime))
 }

@@ -8,7 +8,7 @@ const otpLifetime = time.Minute * 10
 const cleanTick = time.Minute * 5
 
 var otpEmailContent = `
-Hi there!
+Hi %s!
 
 Here is your OTP for SourceFlame
 %d

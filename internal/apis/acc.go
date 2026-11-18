@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/mail"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
@@ -92,12 +93,21 @@ func acc(a *app.App, root Route) {
 			}
 
 			if request.Email != nil && request.OTP == nil {
+				if adrr, err := mail.ParseAddress(*request.Email); err != nil || *request.Email != adrr.Address {
+					utils.RespMsg(
+						"Invalid email",
+						http.StatusBadRequest,
+						w,
+					)
+					return
+				}
+
 				otp, err := a.OTPManager.NewOTP(*request.Email)
 				if !handle(err, w) {
 					return
 				}
 
-				if !handle(a.EmailManager.SendEmail(ctx, *request.Email, otp.GetEmailContent()), w) {
+				if !handle(a.EmailManager.SendEmail(ctx, *request.Email, otp.GetEmailContent(user)), w) {
 					return
 				}
 
