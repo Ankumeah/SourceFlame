@@ -14,6 +14,9 @@ var envVars = map[string]string{
 	"REPOS_PATH":  "",
 	"HASH_CONFIG": "",
 
+	"SMTP_HOST": "",
+	"DOMAIN":    "",
+
 	"EMAIL_URL":  "",
 	"EMAIL_USER": "",
 	"EMAIL_PASS": "",
@@ -54,6 +57,9 @@ func setSettings(app *app.App) {
 	app.Config.DBURL = envVars["DB_URL"]
 	app.Config.ReposPath = envVars["REPOS_PATH"]
 	app.Config.HashConfig = envVars["HASH_CONFIG"]
+
+	app.Config.SMTPHost = envVars["SMTP_HOST"]
+	app.Config.Domain = envVars["DOMAIN"]
 
 	app.Config.EmailURL = envVars["EMAIL_URL"]
 	app.Config.EmailUser = envVars["EMAIL_USER"]

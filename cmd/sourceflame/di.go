@@ -14,7 +14,9 @@ import (
 	"github.com/Ankumeah/SourceFlame/internal/otp"
 )
 
-func setupDI() *app.App {
+func setupDI() (*app.App, context.Context) {
+	log.Println("Starting DI")
+
 	ctx := context.Background()
 	a := &app.App{}
 
@@ -31,7 +33,9 @@ func setupDI() *app.App {
 	wg.Go(func() { getOTPManager(a) })
 	wg.Wait()
 
-	return a
+	log.Println("Completed DI")
+
+	return a, ctx
 }
 
 func getDB(ctx context.Context, app *app.App) {

@@ -16,6 +16,9 @@ type Config struct {
 	DefaultUser string
 	LockUsers   bool
 
+	SMTPHost string
+	Domain   string
+
 	EmailURL  string
 	EmailUser string
 	EmailPass string

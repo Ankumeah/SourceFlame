@@ -1,17 +1,28 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/Ankumeah/SourceFlame/internal/apis"
+	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/frontend"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
+	"github.com/Ankumeah/SourceFlame/internal/smtp"
 )
 
 func main() {
-	app := setupDI()
+	app, ctx := setupDI()
 
+	wg := sync.WaitGroup{}
+	wg.Go(func() { startHTTP(app) })
+	wg.Go(func() { startSMTP(ctx, app) })
+	wg.Wait()
+}
+
+func startHTTP(app *app.App) {
 	mux := http.NewServeMux()
 
 	frontend.Handle(app, mux)
@@ -29,5 +40,11 @@ func main() {
 		),
 	); err != nil {
 		log.Fatalf("Error while serving http: %v\n", err)
+	}
+}
+
+func startSMTP(ctx context.Context, app *app.App) {
+	if err := smtp.Listen(ctx, app); err != nil {
+		log.Fatalf("Error while serving smtp: %v\n", err)
 	}
 }

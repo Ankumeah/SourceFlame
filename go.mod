@@ -3,12 +3,14 @@ module github.com/Ankumeah/SourceFlame
 go 1.27.3
 
 require (
+	github.com/emersion/go-smtp v0.26.0
 	golang.org/x/crypto v0.58.0
 	modernc.org/sqlite v1.61.0
 )
 
 require (
 	github.com/dustin/go-humanize v1.1.0 // indirect
+	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/ncruces/go-strftime v1.1.0 // indirect
