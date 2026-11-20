@@ -34,6 +34,14 @@ body {
   padding: 1em;
 }
 
+h3 {
+  display: inline;
+}
+
+#readme-heading {
+  display: block;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --pri-col: #171717;

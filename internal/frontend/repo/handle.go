@@ -17,6 +17,8 @@ func Handle(app *app.App, mux *http.ServeMux) {
 		{"/{$}", "text/html", index},
 		{"/styles.css", "text/css", styles},
 		{"/script.js", "text/javascript", script},
+		{"/email", "text/html", emails},
+		{"/emails_script.js", "text/javascript", emailsScript},
 	} {
 		mux.HandleFunc(
 			"GET "+prefix+route.path,

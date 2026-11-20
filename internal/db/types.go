@@ -10,3 +10,8 @@ type EmailSender struct {
 	Email    string  `json:"email"`
 	Verified bool    `json:"verified"`
 }
+
+type Email struct {
+	Sender EmailSender `json:"sender"`
+	Data   []byte      `json:"data"`
+}

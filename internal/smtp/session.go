@@ -19,7 +19,8 @@ type session struct {
 	domain string
 
 	from     string
-	sender   db.EmailSender
+	subject  string
+	email    db.Email
 	repo     db.Repo
 	user     *string
 	verified bool
@@ -32,6 +33,10 @@ func (s *session) Mail(from string, _ *smtp.MailOptions) error {
 }
 
 func (s *session) Rcpt(to string, _ *smtp.RcptOptions) error {
+	if s.repo != (db.Repo{}) {
+		return nil
+	}
+
 	parts := strings.Split(to, "@")
 	if len(parts) != 2 {
 		return &smtp.SMTPError{
@@ -81,11 +86,16 @@ func (s *session) Rcpt(to string, _ *smtp.RcptOptions) error {
 	}
 
 	if verified {
-		s.user = &user
+		if user == "" {
+			s.user = nil
+		} else {
+			s.user = &user
+		}
+
 		s.verified = true
 	}
 
-	s.sender = db.EmailSender{
+	s.email.Sender = db.EmailSender{
 		Email:    s.from,
 		Name:     s.user,
 		Verified: s.verified,
@@ -100,12 +110,18 @@ func (s *session) Data(r io.Reader) error {
 		return err
 	}
 
+	s.email.Data = data
+
 	if err := s.app.DB.AddEmail(
 		s.ctx,
-		s.sender,
 		s.repo,
-		data,
-	); err != nil {
+		s.email,
+	); errors.Is(err, errs.ErrInvalidRepo) {
+		return &smtp.SMTPError{
+			Code:    550,
+			Message: "Invalid repo",
+		}
+	} else if err != nil {
 		log.Printf("Error adding email: %v\n", err)
 		return &smtp.SMTPError{
 			Code:    451,
@@ -118,7 +134,7 @@ func (s *session) Data(r io.Reader) error {
 
 func (s *session) Reset() {
 	s.from = ""
-	s.sender = db.EmailSender{}
+	s.email = db.Email{}
 	s.repo = db.Repo{}
 	s.user = nil
 	s.verified = false

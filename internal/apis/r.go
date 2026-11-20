@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
+	"github.com/Ankumeah/SourceFlame/internal/db"
 	"github.com/Ankumeah/SourceFlame/internal/git"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 	"github.com/Ankumeah/SourceFlame/internal/utils"
@@ -341,6 +342,49 @@ func r(a *app.App, root Route) {
 					}{files},
 				), w,
 			)
+		},
+	)
+
+	route.Handle(
+		"GET /emails",
+		func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			emails, err := a.DB.GetAllEmails(
+				ctx,
+				db.Repo{
+					Owner: user,
+					Name:  repo,
+				},
+			)
+			if !handle(err, w) {
+				return
+			}
+
+			if err := json.NewEncoder(w).Encode(emails); err != nil {
+				utils.RespErr(err, w)
+				return
+			}
 		},
 	)
 

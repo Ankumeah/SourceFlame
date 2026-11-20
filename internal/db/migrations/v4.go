@@ -10,9 +10,11 @@ var v4 = migration{
         data        TEXT      NOT NULL,
         user        TEXT                    REFERENCES users(name),
         verified    BOOLEAN   NOT NULL      DEFAULT 0,
-        user_email  TEXT      NOT NULL      REFERENCES users(email),
-        repo        TEXT      NOT NULL      REFERENCES repos(name),
-        repo_owner  TEXT      NOT NULL      REFERENCES repos(owner)
+        email       TEXT      NOT NULL,
+        repo        TEXT      NOT NULL,
+        repo_owner  TEXT      NOT NULL,
+
+        FOREIGN KEY (repo_owner, repo) REFERENCES repos(owner, name)
       );
     `,
 	},
