@@ -2,13 +2,23 @@ async function main() {
   const repo = window.location.pathname.slice(3, -6);
   document.title = repo + " emails"
 
-  loadEmails(repo);
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("page") === null) {
+    url.searchParams.set("page", "1");
+    window.location.href = url;
+  }
+
+  const page = url.searchParams.get("page");
+
+  loadEmails(repo, page);
+  setNextAndLast(page);
 }
 
-async function loadEmails(repo) {
+async function loadEmails(repo, page) {
   const res = await fetch(
     `${location.origin}/r/` +
-    `${repo}/emails`
+    `${repo}/emails` +
+    `?page=${page}`
   );
   if (!res.ok) {
     throw new Error(`Error loading emails: ${res.status}`);
@@ -43,6 +53,11 @@ async function loadEmails(repo) {
       details.appendChild(pre);
     }
   )
+}
+
+function setNextAndLast(page) {
+  document.getElementById("next").href = "?page=" + (+page + 1);
+  document.getElementById("last").href = "?page=" + Math.max(page - 1, 1);
 }
 
 function getSubject(rawEmail) {

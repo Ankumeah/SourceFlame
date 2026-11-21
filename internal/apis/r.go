@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
@@ -350,6 +351,17 @@ func r(a *app.App, root Route) {
 		func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
+			page, err := strconv.ParseUint(r.URL.Query().Get("page"), 10, 64)
+			if err != nil {
+				utils.RespMsg(
+					"Invalid page",
+					http.StatusBadRequest,
+					w,
+				)
+
+				return
+			}
+
 			user := r.PathValue("user")
 			if !utils.IsValidName(user) {
 				utils.RespMsg(
@@ -376,6 +388,7 @@ func r(a *app.App, root Route) {
 					Owner: user,
 					Name:  repo,
 				},
+				page,
 			)
 			if !handle(err, w) {
 				return

@@ -8,6 +8,8 @@ import (
 	"github.com/Ankumeah/SourceFlame/internal/errs"
 )
 
+const getEmailLimit = 10
+
 // Add a new email
 //
 // May return the following errors:
@@ -41,7 +43,7 @@ func (db *DBController) AddEmail(ctx context.Context, repo Repo, email Email) er
 	return err
 }
 
-func (db *DBController) GetAllEmails(ctx context.Context, repo Repo) ([]Email, error) {
+func (db *DBController) GetAllEmails(ctx context.Context, repo Repo, page uint64) ([]Email, error) {
 	rows, err := db.db.QueryContext(
 		ctx, `
       SELECT
@@ -52,10 +54,14 @@ func (db *DBController) GetAllEmails(ctx context.Context, repo Repo) ([]Email, e
       FROM emails
       WHERE
         repo = ? AND
-        repo_owner = ?;
+        repo_owner = ?
+      LIMIT ?
+      OFFSET ?;
     `,
 		repo.Name,
 		repo.Owner,
+		getEmailLimit,
+		getEmailLimit*(page-1),
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
