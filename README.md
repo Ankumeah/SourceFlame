@@ -32,6 +32,10 @@ docker run \
 
 or
 
+> [!WARNING]
+> New migrations are only added after a tag
+migrations may change in between commit otherwise
+
 ```sh
 go build -o build/sf -ldflags='-s -w' .
 
@@ -42,6 +46,10 @@ mkdir -p build/repos
 ```
 
 or
+
+> [!WARNING]
+> New migrations are only added after a tag
+migrations may change in between commit otherwise
 
 ```sh
 docker build -t sf .
