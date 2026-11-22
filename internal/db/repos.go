@@ -13,21 +13,16 @@ import (
 //   - `errs.ErrExistRepo`
 //   - Errors by the underlying DB
 func (db *DBController) AddRepo(ctx context.Context, repo Repo) error {
-	info, err := db.db.ExecContext(
+	_, err := db.db.ExecContext(
 		ctx, `
       INSERT INTO repos(name, owner)
-      SELECT ?, ?;
+      VALUES(?, ?);
     `, repo.Name, repo.Owner,
 	)
 
 	if isUniqueViolation(err) {
 		return errs.ErrExistsRepo
-	}
-
-	affected, err := info.RowsAffected()
-	if err != nil {
-		return nil
-	} else if affected < 1 {
+	} else if isForeignKeyViolation(err) {
 		return errs.ErrInvalidUser
 	}
 

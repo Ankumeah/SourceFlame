@@ -14,3 +14,11 @@ func isUniqueViolation(err error) bool {
 
 	return false
 }
+
+func isForeignKeyViolation(err error) bool {
+	if sqliteErr, ok := errors.AsType[*sqlite.Error](err); ok {
+		return sqliteErr.Code() == lib.SQLITE_CONSTRAINT_FOREIGNKEY
+	}
+
+	return false
+}

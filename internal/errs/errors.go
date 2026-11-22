@@ -14,6 +14,7 @@ var ErrInvalidUser = fmt.Errorf("%w: Invalid user", ErrInvalid)
 var ErrInvalidRepo = fmt.Errorf("%w: Invalid repo", ErrInvalid)
 var ErrInvalidBlob = fmt.Errorf("%w: Invalid blob", ErrInvalid)
 var ErrInvalidRef = fmt.Errorf("%w: Invalid ref", ErrInvalid)
+var ErrInvalidPR = fmt.Errorf("%w: Invalid PR", ErrInvalid)
 
 var ErrNotExist = errors.New("%w: Not exists")
 var ErrNotExistCommits = fmt.Errorf("%w: No commits exist", ErrNotExist)
