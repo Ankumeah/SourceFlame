@@ -1,10 +1,8 @@
 package apis
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
-	"net/mail"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
@@ -53,103 +51,6 @@ func acc(a *app.App, root Route) {
 			}
 
 			w.WriteHeader(http.StatusOK)
-		},
-	)
-
-	authed.Base(
-		"PATCH",
-		func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-
-			user, ok := ctx.Value(middlewares.UserKey).(string)
-			if !ok {
-				utils.RespErr(errors.New("user set by middleware not string"), w)
-				return
-			}
-
-			request := struct {
-				Email  *string `json:"email"`
-				PubKey *string `json:"pub_key"`
-				OTP    *uint   `json:"otp"`
-			}{}
-
-			if r.Body == nil {
-				utils.RespMsg(
-					"No json body provided",
-					http.StatusBadRequest,
-					w,
-				)
-				return
-			}
-			defer r.Body.Close()
-
-			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-				utils.RespMsg(
-					"Invalid json body",
-					http.StatusBadRequest,
-					w,
-				)
-				return
-			}
-
-			if request.Email != nil && request.OTP == nil {
-				if adrr, err := mail.ParseAddress(*request.Email); err != nil || *request.Email != adrr.Address {
-					utils.RespMsg(
-						"Invalid email",
-						http.StatusBadRequest,
-						w,
-					)
-					return
-				}
-
-				otp, err := a.OTPManager.NewOTP(*request.Email)
-				if !handle(err, w) {
-					return
-				}
-
-				if !handle(a.EmailManager.SendEmail(ctx, *request.Email, otp.GetEmailContent(user)), w) {
-					return
-				}
-
-				w.WriteHeader(http.StatusAccepted)
-				return
-			} else if request.PubKey != nil {
-				handle(a.DB.ChangePubKey(ctx, user, *request.PubKey), w)
-				return
-			} else if request.OTP != nil {
-				if request.Email == nil {
-					utils.RespMsg(
-						"No email provided",
-						http.StatusBadRequest,
-						w,
-					)
-					return
-				}
-
-				if !a.OTPManager.CheckOTP(*request.Email, *request.OTP) {
-					utils.RespMsg(
-						"Invalid OTP",
-						http.StatusForbidden,
-						w,
-					)
-
-					return
-				}
-
-				if !handle(a.DB.ChangeEmail(ctx, user, *request.Email), w) {
-					return
-				}
-
-				w.WriteHeader(http.StatusOK)
-				return
-			} else {
-				utils.RespMsg(
-					"No oprations possible with given data",
-					http.StatusBadRequest,
-					w,
-				)
-				return
-			}
 		},
 	)
 

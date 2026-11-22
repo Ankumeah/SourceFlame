@@ -8,10 +8,8 @@ import (
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/db"
 	"github.com/Ankumeah/SourceFlame/internal/db/migrations"
-	"github.com/Ankumeah/SourceFlame/internal/email"
 	"github.com/Ankumeah/SourceFlame/internal/git"
 	"github.com/Ankumeah/SourceFlame/internal/hash"
-	"github.com/Ankumeah/SourceFlame/internal/otp"
 )
 
 func setupDI() *app.App {
@@ -27,8 +25,6 @@ func setupDI() *app.App {
 	})
 	wg.Go(func() { getHasher(a) })
 	wg.Go(func() { getGitController(a) })
-	wg.Go(func() { getEmailManager(a) })
-	wg.Go(func() { getOTPManager(a) })
 	wg.Wait()
 
 	return a
@@ -75,24 +71,4 @@ func getGitController(app *app.App) {
 	app.GitController = git.GetGitController(app.Config.ReposPath)
 
 	log.Println("Got git controller")
-}
-
-func getEmailManager(app *app.App) {
-	log.Println("Getting email manager")
-
-	app.EmailManager = email.GetNetSMTPEmailManager(
-		app.Config.EmailUser,
-		app.Config.EmailPass,
-		app.Config.EmailURL,
-	)
-
-	log.Println("Got email manager")
-}
-
-func getOTPManager(app *app.App) {
-	log.Println("Getting OTP manager")
-
-	app.OTPManager = otp.NewOTPManager()
-
-	log.Println("Got OTP manager")
 }

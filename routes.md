@@ -23,7 +23,6 @@ spec is AI generated with this file as the example
 | GET    | `/r/{user}/{repo}/tree/{dir...}`                    | `ref`                                                 |                                                  |                                      |
 | GET    | `/api/ping`                                         |                                                       |                                                  |                                      |
 | POST   | `/api/acc`                                          |                                                       | `Authorization (Basic base64(user:pass))`        |                                      |
-| PATCH  | `/api/acc`                                          |                                                       | `Authorization (Basic base64(user:pass))`        | `{ "email": string, "otp": *string}` |
 | DELETE | `/api/acc`                                          |                                                       | `Authorization (Basic base64(user:pass))`        |                                      |
 | POST   | `/api/repos/{repo}`                                 |                                                       | `Authorization (Basic base64(user:pass))`        |                                      |
 | DELETE | `/api/repos/{repo}`                                 |                                                       | `Authorization (Basic base64(user:pass))`        |                                      |
