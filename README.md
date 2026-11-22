@@ -36,6 +36,9 @@ or
 > New migrations are only added after a tag
 migrations may change in between commit otherwise
 
+> [!NOTE]
+> Host machine must have [patatt](https://patatt.docs.kernel.org/) installed
+
 ```sh
 go build -o build/sf -ldflags='-s -w' .
 

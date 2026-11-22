@@ -6,6 +6,6 @@ import (
 )
 
 func RespErr(err error, w http.ResponseWriter) {
-	log.Println(err)
+	log.Printf("Error: %v\n", err)
 	w.WriteHeader(http.StatusInternalServerError)
 }

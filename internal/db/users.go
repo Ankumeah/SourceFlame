@@ -159,24 +159,22 @@ func (db *DBController) GetUserByEmail(ctx context.Context, email string) (strin
 	return user, err
 }
 
-// Get a the public key associated with a email
+// Get a the user and public key associated with a email
 //
 // May return the following errors:
 //   - `errs.ErrInvalidEmail`
 //   - Errors by the underlying DB
-func (db *DBController) GetPubKey(ctx context.Context, email string) (string, error) {
-	var key string
-
-	err := db.db.QueryRowContext(
+func (db *DBController) GetUserAndPubKey(ctx context.Context, email string) (user string, key string, err error) {
+	err = db.db.QueryRowContext(
 		ctx, `
-      SELECT pub_key FROM users
+      SELECT name, pub_key FROM users
       WHERE email = ?;
     `, email,
-	).Scan(&key)
+	).Scan(&user, &key)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		err = errs.ErrInvalidEmail
 	}
 
-	return key, err
+	return
 }

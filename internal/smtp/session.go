@@ -10,6 +10,7 @@ import (
 	"github.com/Ankumeah/SourceFlame/internal/app"
 	"github.com/Ankumeah/SourceFlame/internal/db"
 	"github.com/Ankumeah/SourceFlame/internal/errs"
+	"github.com/Ankumeah/SourceFlame/internal/utils"
 	"github.com/emersion/go-smtp"
 )
 
@@ -72,35 +73,6 @@ func (s *session) Rcpt(to string, _ *smtp.RcptOptions) error {
 		}
 	}
 
-	verified := true
-
-	user, err := s.app.DB.GetUserByEmail(s.ctx, s.from)
-	if errors.Is(err, errs.ErrInvalidEmail) {
-		verified = false
-	} else if err != nil {
-		log.Printf("Error getting user by email: %v\n", err)
-		return &smtp.SMTPError{
-			Code:    451,
-			Message: "Internal server error",
-		}
-	}
-
-	if verified {
-		if user == "" {
-			s.user = nil
-		} else {
-			s.user = &user
-		}
-
-		s.verified = true
-	}
-
-	s.email.Sender = db.EmailSender{
-		Email:    s.from,
-		Name:     s.user,
-		Verified: s.verified,
-	}
-
 	return nil
 }
 
@@ -108,6 +80,42 @@ func (s *session) Data(r io.Reader) error {
 	data, err := io.ReadAll(r)
 	if err != nil {
 		return err
+	}
+
+	user, key, err := s.app.DB.GetUserAndPubKey(s.ctx, s.from)
+	if errors.Is(err, errs.ErrInvalidEmail) {
+		s.verified = false
+	} else if err != nil {
+		log.Printf("Error getting user public key: %v\n", err)
+		return &smtp.SMTPError{
+			Code:    451,
+			Message: "Internal server error",
+		}
+	} else {
+		ok, err := utils.VerifySign(s.ctx, key, data)
+		if err != nil {
+			log.Printf("Error verifing email sign: %v\n", err)
+			return &smtp.SMTPError{
+				Code:    451,
+				Message: "Internal server error",
+			}
+		}
+
+		if ok {
+			log.Println("Verified")
+			s.verified = true
+			s.user = &user
+		} else {
+			log.Println("Not Verified")
+			s.verified = false
+			s.user = nil
+		}
+	}
+
+	s.email.Sender = db.EmailSender{
+		Email:    s.from,
+		Name:     s.user,
+		Verified: s.verified,
 	}
 
 	s.email.Data = data
