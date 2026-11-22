@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
   title: SourceFlame routes
-  version: "v0.2.0"
+  version: "v0.3.0"
 
 servers:
-  - url: localhost:8000
+  - url: http://localhost:8000
 
 security: []
 
@@ -27,12 +27,6 @@ paths:
           description: Success
 
   /r/{user}/{repo}/info/refs:
-    servers:
-      - url: /
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
     get:
       operationId: gitRefs
       parameters:
@@ -44,12 +38,6 @@ paths:
           description: Git service advertisement
 
   /r/{user}/{repo}/git-upload-pack:
-    servers:
-      - url: /
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
     post:
       operationId: gitUploadPack
       parameters:
@@ -62,12 +50,6 @@ paths:
           $ref: "#/components/responses/UploadPackResponse"
 
   /r/{user}/{repo}/git-receive-pack:
-    servers:
-      - url: /
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
     post:
       operationId: gitReceivePack
       security:
@@ -81,62 +63,7 @@ paths:
         "200":
           $ref: "#/components/responses/ReceivePackResponse"
 
-  /ping:
-    servers:
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
-    get:
-      operationId: ping
-      responses:
-        "200":
-          description: Success
-
-  /acc:
-    servers:
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
-    post:
-      operationId: createAccount
-      security:
-        - basicAuth: []
-      responses:
-        "200":
-          description: Success
-    patch:
-      operationId: updateAccount
-      security:
-        - basicAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-      responses:
-        "200":
-          description: Success
-    delete:
-      operationId: deleteAccount
-      security:
-        - basicAuth: []
-      responses:
-        "200":
-          description: Success
-
   /r/{user}/{repo}/refs:
-    servers:
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
     get:
       operationId: listRefs
       parameters:
@@ -147,11 +74,6 @@ paths:
           description: Repository refs
 
   /r/{user}/{repo}/blob/{file}:
-    servers:
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
     get:
       operationId: getBlob
       parameters:
@@ -161,7 +83,7 @@ paths:
         - name: file
           in: path
           required: true
-          description: File path
+          description: File path; may include nested directories.
           schema:
             type: string
       responses:
@@ -169,11 +91,6 @@ paths:
           description: File contents
 
   /r/{user}/{repo}/git-log:
-    servers:
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
     get:
       operationId: getGitLog
       parameters:
@@ -185,11 +102,6 @@ paths:
           description: Repository commit history
 
   /r/{user}/{repo}/tree/{dir}:
-    servers:
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
     get:
       operationId: getTree
       parameters:
@@ -199,19 +111,76 @@ paths:
         - name: dir
           in: path
           required: true
-          description: Directory path
+          description: Directory path; may include nested directories.
           schema:
             type: string
       responses:
         "200":
           description: Directory contents
 
-  /repos/{repo}:
-    servers:
-      - url: /api/{apiVersion}
-        variables:
-          apiVersion:
-            default: v1
+  /r/{user}/{repo}/pr:
+    post:
+      operationId: createPullRequest
+      security:
+        - basicAuth: []
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PullRequestInput"
+            example:
+              title: Add example feature
+              body: |-
+                This is a sample pull request with dummy data.
+
+                stuff	some does studd
+              url: test-url.com
+      responses:
+        "200":
+          description: Success
+
+    get:
+      operationId: listPullRequests
+      parameters:
+        - $ref: "#/components/parameters/User"
+        - $ref: "#/components/parameters/Repo"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Pull requests
+
+  /api/ping:
+    get:
+      operationId: ping
+      responses:
+        "200":
+          description: Success
+
+  /api/acc:
+    post:
+      operationId: createAccount
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: Success
+    delete:
+      operationId: deleteAccount
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: Success
+
+  /api/repos/{repo}:
     post:
       operationId: createRepository
       security:
@@ -268,6 +237,21 @@ components:
         enum:
           - git-receive-pack
           - git-upload-pack
+
+  schemas:
+    PullRequestInput:
+      type: object
+      required:
+        - title
+        - body
+        - url
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        url:
+          type: string
 
   requestBodies:
     UploadPackRequest:

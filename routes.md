@@ -21,6 +21,8 @@ spec is AI generated with this file as the example
 | GET    | `/r/{user}/{repo}/blob/{file...}`                   | `ref`                                                 |                                                  |                                      |
 | GET    | `/r/{user}/{repo}/git-log`                          | `ref`                                                 |                                                  |                                      |
 | GET    | `/r/{user}/{repo}/tree/{dir...}`                    | `ref`                                                 |                                                  |                                      |
+| POST   | `/r/{user}/{repo}/pr`                               |                                                       | `Authorization (Basic base64(user:pass))`        | Git stuff idk                        |
+| GET    | `/r/{user}/{repo}/pr`                               | `page`                                                |                                                  | Check `./test.d/post_pr.sh`          |
 | GET    | `/api/ping`                                         |                                                       |                                                  |                                      |
 | POST   | `/api/acc`                                          |                                                       | `Authorization (Basic base64(user:pass))`        |                                      |
 | DELETE | `/api/acc`                                          |                                                       | `Authorization (Basic base64(user:pass))`        |                                      |
