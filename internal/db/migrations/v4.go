@@ -13,9 +13,9 @@ var v4 = migration{
         repo        TEXT  NOT NULL,
         repo_owner  TEXT  NOT NULL,
         url         TEXT  NOT NULL,
-        status      TEXT  NOT NULL      CHECK (status IN ('approved', 'rejected', 'pending'))
+        status      TEXT  NOT NULL      CHECK (status IN ('approved', 'rejected', 'pending')),
 
-        FOREIGN KEY (repo, repo_owner) REFERENCES parent(name, owner)
+        FOREIGN KEY (repo, repo_owner) REFERENCES repo(name, owner)
       );
     `,
 	},

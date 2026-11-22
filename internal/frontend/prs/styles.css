@@ -1,0 +1,97 @@
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pri-col: #171717;
+    --sec-col: #1f1f1f;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --sec-col: #bbb;
+    --pri-col: #eee;
+  }
+}
+
+:root {
+  color-scheme: light dark;
+  background-color: var(--pri-col);
+}
+
+body {
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+#repo-name {
+  text-align: center;
+}
+
+#meta-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14pt;
+  margin-bottom: 1em;
+}
+
+.code-block {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  overflow: auto;
+  white-space: pre;
+  background-color: var(--sec-col);
+  font-size: 12pt;
+  padding: 1em;
+}
+
+h3 {
+  display: inline;
+}
+
+/*
+  WARNING
+  This next part is AI generated
+*/
+
+.pr {
+  margin-bottom: 0.75em;
+  padding: 0.75em 1em;
+  background-color: var(--sec-col);
+  border-radius: 6px;
+}
+
+.pr summary {
+  cursor: pointer;
+}
+
+.pr summary h3 {
+  margin: 0;
+}
+
+.pr-content {
+  margin-top: 0.75em;
+  overflow-wrap: anywhere;
+}
+
+.pr-content p {
+  margin: 0.5em 0;
+}
+
+.pr-content a {
+  color: inherit;
+}
+
+.pr-body {
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: var(--pri-col);
+  padding: 1em;
+  border-radius: 4px;
+}

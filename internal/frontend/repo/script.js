@@ -1,3 +1,6 @@
+let logLoaded = false;
+let treeLoaded = false;
+
 async function main() {
   const repo = window.location.pathname.slice(3, -1);
 
@@ -9,8 +12,26 @@ async function main() {
   if (await loadRefs(repo)) { return }
 
   loadReadme(repo);
-  loadLog(repo);
-  loadTree(repo);
+
+  document.getElementById("log-box").addEventListener(
+    "toggle",
+    () => {
+      if (!logLoaded) {
+        logLoaded = true;
+        loadLog(repo);
+      }
+    }
+  )
+
+  document.getElementById("tree-box").addEventListener(
+    "toggle",
+    () => {
+      if (!treeLoaded) {
+        treeLoaded = true;
+        loadTree(repo);
+      }
+    }
+  )
 }
 
 function setClone(repo) {
