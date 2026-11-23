@@ -1,6 +1,3 @@
-EMAIL_URL=localhost:1025
-EMAIL_USER=user@test.com
-EMAIL_PASS=pass
 DEFAULT_USER=user
 LOCK_USERS=true
 HOST=0.0.0.0:8000

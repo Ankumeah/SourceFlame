@@ -5,9 +5,11 @@ import (
 	"errors"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/Ankumeah/SourceFlame/internal/app"
+	"github.com/Ankumeah/SourceFlame/internal/db"
 	"github.com/Ankumeah/SourceFlame/internal/git"
 	"github.com/Ankumeah/SourceFlame/internal/middlewares"
 	"github.com/Ankumeah/SourceFlame/internal/utils"
@@ -15,6 +17,7 @@ import (
 
 func r(a *app.App, root Route) {
 	route := root.Sub("/r/{user}/{repo}")
+	authed := root.Sub("/r/{user}/{repo}", func(h http.Handler) http.Handler { return middlewares.BasicAuth(h, a) })
 	defaultRoute := root.Sub("/r/{path}")
 
 	route.Handle(
@@ -340,6 +343,117 @@ func r(a *app.App, root Route) {
 						Files []git.File `json:"files"`
 					}{files},
 				), w,
+			)
+		},
+	)
+
+	authed.Handle(
+		"POST /pr",
+		func(w http.ResponseWriter, r *http.Request) {
+			owner, ok := r.Context().Value(middlewares.UserKey).(string)
+			if !ok {
+				utils.RespErr(errors.New("user set by middleware not string"), w)
+				return
+			}
+
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			request := db.PR{}
+
+			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+				utils.RespMsg(
+					err.Error(),
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			request.Owner = owner
+			request.Repo = db.Repo{
+				Owner: user,
+				Name:  repo,
+			}
+
+			if !handle(a.DB.AddPR(r.Context(), request), w) {
+				return
+			}
+
+			w.WriteHeader(http.StatusCreated)
+		},
+	)
+
+	route.Handle(
+		"GET /pr",
+		func(w http.ResponseWriter, r *http.Request) {
+			page, err := strconv.ParseUint(r.URL.Query().Get("page"), 10, 64)
+			if err != nil {
+				utils.RespMsg(
+					err.Error(),
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			user := r.PathValue("user")
+			if !utils.IsValidName(user) {
+				utils.RespMsg(
+					"Invalid username",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			repo := r.PathValue("repo")
+			if !utils.IsValidName(repo) {
+				utils.RespMsg(
+					"Invalid repo name",
+					http.StatusBadRequest,
+					w,
+				)
+				return
+			}
+
+			prs, err := a.DB.GetPRs(
+				r.Context(),
+				db.Repo{
+					Owner: user,
+					Name:  repo,
+				},
+				page,
+			)
+
+			if !handle(err, w) {
+				return
+			}
+
+			handle(
+				json.NewEncoder(w).Encode(
+					struct {
+						PRs []db.PR `json:"prs"`
+					}{prs},
+				),
+				w,
 			)
 		},
 	)
